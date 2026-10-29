@@ -132,7 +132,7 @@
             <!-- Поиск -->
             <div id="search-section">
                 <div id="search-box">
-                    <input type="text" id="search-input" placeholder="Поиск по нику или @юзернейму..." oninput="searchUsers()">
+                    <input type="text" id="search-input" placeholder="Поиск по @юзернейму..." oninput="searchUsers()">
                 </div>
                 <div id="all-users-list" style="display: none;">
                     <div class="list-title" style="background:#d1ecf1; color:#0c5460;">Результаты поиска</div>
@@ -172,7 +172,7 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         // ⚠️ ВСТАВЬТЕ СЮДА ВАШИ ДАННЫЕ ИЗ FIREBASE
-       const firebaseConfig = { 
+        const firebaseConfig = { 
   apiKey : "AIzaSyAkBvVaf0_KNZ4sVDfMtuziGCGBQwUq55E" , 
   authDomain : "find-dude.firebaseapp.com" , 
   databaseURL : "https://find-dude-default-rtdb.firebaseio.com" , 
@@ -320,7 +320,6 @@
             });
         };
 
-        // ИСПРАВЛЕННАЯ ФУНКЦИЯ ПРИНЯТИЯ
         window.acceptRequest = function(fromUser, fromNick) {
             // 1. Добавляем друг друга в контакты
             set(ref(db, `contacts/${currentUser}/${fromUser}`), fromNick);
@@ -330,7 +329,7 @@
             remove(ref(db, `friendRequests/${currentUser}/${fromUser}`)).then(() => {
                 loadContacts(); // Обновляем список контактов
                 
-                // 3. СРАЗУ ОТКРЫВАЕМ ЧАТ С ЭТИМ ЧЕЛОВЕКОМ (чтобы друг мог писать)
+                // 3. СРАЗУ ОТКРЫВАЕМ ЧАТ С ЭТИМ ЧЕЛОВЕКОМ
                 openChat(fromUser, fromNick);
                 alert(`Вы приняли заявку от ${fromNick}. Чат открыт!`);
             });
@@ -369,9 +368,8 @@
             });
         }
 
-        // ИСПРАВЛЕННЫЙ ПОИСК (И ПО НИКУ, И ПО @ЮЗЕРНЕЙМУ)
+        // ИСПРАВЛЕННЫЙ ПОИСК (ТОЛЬКО ПО @ЮЗЕРНЕЙМУ)
         window.searchUsers = function() {
-            // Убираем @ и делаем запрос в нижнем регистре
             const query = searchInput.value.toLowerCase().trim().replace('@', '');
             
             if (query === "") {
@@ -388,11 +386,10 @@
             for (const username in allUsersData) {
                 if (username === currentUser) continue;
 
-                const userNick = allUsersData[username].nickname;
-
-                // Ищем совпадения И в юзернейме, И в нике
-                if (username.includes(query) || userNick.toLowerCase().includes(query)) {
+                // Ищем ТОЛЬКО по юзернейму
+                if (username.includes(query)) {
                     found = true;
+                    const userNick = allUsersData[username].nickname;
                     const divAll = document.createElement('div');
                     divAll.className = 'contact';
                     
@@ -400,15 +397,12 @@
                     let btnHtml = "";
                     
                     if (isContact) {
-                        // Если уже в контактах, даем кнопку "Написать"
                         btnHtml = `<button class="btn-chat" onclick="event.stopPropagation(); openChat('${username}', '${userNick}')">Написать</button>`;
                     } else {
-                        // Если нет - кнопку добавить
                         btnHtml = `<button class="btn-send-request" onclick="event.stopPropagation(); sendFriendRequest('${username}')">Добавить в друзья</button>`;
                     }
 
                     divAll.innerHTML = `<span>${userNick}</span><small>@${username}</small>${btnHtml}`;
-                    
                     allUsersList.appendChild(divAll);
                 }
             }

@@ -37,10 +37,18 @@
         #contacts-list, #all-users-list, #requests-list { flex: 1; overflow-y: auto; }
         .list-title { padding: 10px; font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold; background: #e9ecef; border-bottom: 1px solid #ccc; }
         
-        .contact { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; font-weight: bold; color: #333; display: flex; flex-direction: column; }
+        /* Карточка контакта */
+        .contact { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; font-weight: bold; color: #333; display: flex; justify-content: space-between; align-items: center; }
         .contact:hover { background: #e2e6ea; }
         .contact.active { background: #dcf8c6; border-left: 4px solid #2ea44f; }
-        .contact small { font-weight: normal; color: #888; font-size: 12px; }
+        .contact-info { display: flex; flex-direction: column; }
+        .contact-info small { font-weight: normal; color: #888; font-size: 12px; margin-top: 3px; }
+        
+        /* Красный кружок уведомления */
+        .unread-badge { 
+            background: #dc3545; color: white; border-radius: 50%; padding: 2px 8px; 
+            font-size: 12px; font-weight: bold; display: none; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
 
         /* Карточка заявки */
         .request-card { padding: 10px 15px; border-bottom: 1px solid #eee; display: flex; flex-direction: column; gap: 5px; }
@@ -123,13 +131,11 @@
                 <button id="logout-btn" onclick="logout()">Выйти</button>
             </div>
 
-            <!-- Вкладки -->
             <div class="tabs">
                 <button class="tab-btn active" onclick="switchTab('search')">Поиск людей</button>
                 <button class="tab-btn" onclick="switchTab('requests')">Заявки <span id="req-badge"></span></button>
             </div>
 
-            <!-- Поиск -->
             <div id="search-section">
                 <div id="search-box">
                     <input type="text" id="search-input" placeholder="Поиск по @юзернейму..." oninput="searchUsers()">
@@ -139,13 +145,11 @@
                 </div>
             </div>
 
-            <!-- Заявки -->
             <div id="requests-section" style="display: none; flex: 1; overflow-y: auto;">
                 <div class="list-title">Входящие заявки</div>
                 <div id="requests-list"></div>
             </div>
             
-            <!-- Мои контакты -->
             <div id="contacts-list">
                 <div class="list-title">Мои контакты</div>
             </div>
@@ -195,6 +199,8 @@
         let messagesListener = null;
         let allUsersData = {}; 
         let myContacts = []; 
+        let unreadListeners = {}; // Слушатели непрочитанных сообщений
+        let lastReadTimes = {}; // Время последнего прочтения
 
         let selectedMsgId = null;
         let selectedMsgText = "";
@@ -211,7 +217,6 @@
         const contextMenu = document.getElementById('context-menu');
         const searchInput = document.getElementById('search-input');
 
-        // --- РЕГИСТРАЦИЯ И ВХОД ---
         window.register = async function() {
             const user = document.getElementById('reg-username').value.trim().toLowerCase().replace('@', '');
             const nick = document.getElementById('reg-nickname').value.trim();
@@ -244,7 +249,6 @@
 
         window.logout = function() { signOut(auth); };
 
-        // --- ИНИЦИАЛИЗАЦИЯ ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user.email.replace(emailDomain, "");
@@ -264,10 +268,10 @@
                 document.getElementById('reg-username').value = "";
                 document.getElementById('reg-nickname').value = "";
                 document.getElementById('reg-password').value = "";
+                document.title = "Моя Соцсеть"; // Сбрасываем заголовок
             }
         });
 
-        // --- ВКЛАДКИ ---
         window.switchTab = function(tab) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
@@ -281,7 +285,6 @@
             }
         };
 
-        // --- ЗАЯВКИ В ДРУЗЬЯ ---
         function listenToRequests() {
             const reqRef = ref(db, 'friendRequests/' + currentUser);
             onValue(reqRef, (snapshot) => {
@@ -321,15 +324,10 @@
         };
 
         window.acceptRequest = function(fromUser, fromNick) {
-            // 1. Добавляем друг друга в контакты
             set(ref(db, `contacts/${currentUser}/${fromUser}`), fromNick);
             set(ref(db, `contacts/${fromUser}/${currentUser}`), currentNick);
-            
-            // 2. Удаляем заявку
             remove(ref(db, `friendRequests/${currentUser}/${fromUser}`)).then(() => {
-                loadContacts(); // Обновляем список контактов
-                
-                // 3. СРАЗУ ОТКРЫВАЕМ ЧАТ С ЭТИМ ЧЕЛОВЕКОМ
+                loadContacts();
                 openChat(fromUser, fromNick);
                 alert(`Вы приняли заявку от ${fromNick}. Чат открыт!`);
             });
@@ -339,7 +337,6 @@
             remove(ref(db, `friendRequests/${currentUser}/${fromUser}`));
         };
 
-        // --- ПОИСК И КОНТАКТЫ ---
         function loadAllUsers() {
             get(ref(db, 'users')).then((snapshot) => {
                 if (snapshot.exists()) allUsersData = snapshot.val();
@@ -355,12 +352,25 @@
                     for (const partner in contacts) {
                         myContacts.push(partner);
                         const partnerNick = contacts[partner];
+                        
                         const div = document.createElement('div');
                         div.className = 'contact';
                         div.dataset.name = partner;
-                        div.innerHTML = `<span>${partnerNick}</span><small>@${partner}</small>`;
+                        div.id = 'contact_' + partner;
+                        
+                        // Добавляем красный кружок (скрыт по умолчанию)
+                        div.innerHTML = `
+                            <div class="contact-info">
+                                <span>${partnerNick}</span>
+                                <small>@${partner}</small>
+                            </div>
+                            <span class="unread-badge" id="badge_${partner}">0</span>
+                        `;
                         div.onclick = () => openChat(partner, partnerNick, div);
                         contactsList.appendChild(div);
+
+                        // Запускаем слушатель непрочитанных сообщений для этого контакта
+                        listenToUnreadMessages(partner);
                     }
                 } else {
                     contactsList.innerHTML += "<div style='padding:10px;color:#888'>Список пуст</div>";
@@ -368,7 +378,69 @@
             });
         }
 
-        // ИСПРАВЛЕННЫЙ ПОИСК (ТОЛЬКО ПО @ЮЗЕРНЕЙМУ)
+        // --- СИСТЕМА НЕПРОЧИТАННЫХ СООБЩЕНИЙ ---
+        function listenToUnreadMessages(partner) {
+            if (unreadListeners[partner]) return; // Уже слушаем
+
+            const roomUsers = [currentUser, partner].sort();
+            const roomId = "chat_" + roomUsers[0] + "_" + roomUsers[1];
+            
+            // Слушаем последние сообщения в этой комнате
+            const chatRef = ref(db, 'chats/' + roomId);
+            unreadListeners[partner] = onValue(chatRef, (snapshot) => {
+                let unreadCount = 0;
+                if (snapshot.exists()) {
+                    const messages = snapshot.val();
+                    
+                    // Получаем время последнего прочтения (если нет - 0)
+                    get(ref(db, `lastRead/${currentUser}/${roomId}`)).then((readSnapshot) => {
+                        const lastRead = readSnapshot.exists() ? readSnapshot.val() : 0;
+
+                        for (const key in messages) {
+                            const msg = messages[key];
+                            // Если сообщение от другого человека и оно новее, чем время прочтения
+                            if (msg.sender !== currentUser && msg.timestamp > lastRead) {
+                                unreadCount++;
+                            }
+                        }
+
+                        const badge = document.getElementById('badge_' + partner);
+                        if (badge) {
+                            if (unreadCount > 0) {
+                                badge.innerText = unreadCount;
+                                badge.style.display = 'inline-block';
+                            } else {
+                                badge.style.display = 'none';
+                            }
+                        }
+
+                        // Обновляем заголовок вкладки браузера
+                        updateTabTitle();
+                    });
+                } else {
+                    const badge = document.getElementById('badge_' + partner);
+                    if (badge) badge.style.display = 'none';
+                    updateTabTitle();
+                }
+            });
+        }
+
+        // Обновление заголовка страницы (вкладки)
+        function updateTabTitle() {
+            let totalUnread = 0;
+            document.querySelectorAll('.unread-badge').forEach(badge => {
+                if (badge.style.display !== 'none') {
+                    totalUnread += parseInt(badge.innerText) || 0;
+                }
+            });
+            
+            if (totalUnread > 0) {
+                document.title = `(${totalUnread}) Моя Соцсеть`;
+            } else {
+                document.title = "Моя Соцсеть";
+            }
+        }
+
         window.searchUsers = function() {
             const query = searchInput.value.toLowerCase().trim().replace('@', '');
             
@@ -386,7 +458,6 @@
             for (const username in allUsersData) {
                 if (username === currentUser) continue;
 
-                // Ищем ТОЛЬКО по юзернейму
                 if (username.includes(query)) {
                     found = true;
                     const userNick = allUsersData[username].nickname;
@@ -402,14 +473,14 @@
                         btnHtml = `<button class="btn-send-request" onclick="event.stopPropagation(); sendFriendRequest('${username}')">Добавить в друзья</button>`;
                     }
 
-                    divAll.innerHTML = `<span>${userNick}</span><small>@${username}</small>${btnHtml}`;
+                    divAll.innerHTML = `<div class="contact-info"><span>${userNick}</span><small>@${username}</small></div>${btnHtml}`;
                     allUsersList.appendChild(divAll);
                 }
             }
             if (!found) allUsersList.innerHTML += "<div style='padding:10px;color:#888'>Никого не найдено</div>";
         };
 
-        // --- ЧАТ ---
+        // --- ЧАТ И ОТМЕТКА О ПРОЧТЕНИИ ---
         function openChat(partnerUsername, partnerNick, element) {
             document.querySelectorAll('.contact').forEach(c => c.classList.remove('active'));
             if (element) element.classList.add('active');
@@ -423,6 +494,14 @@
             const roomUsers = [currentUser, partnerUsername].sort();
             currentRoomId = "chat_" + roomUsers[0] + "_" + roomUsers[1];
             
+            // Отмечаем чат как прочитанный (записываем текущее время)
+            set(ref(db, `lastRead/${currentUser}/${currentRoomId}`), Date.now());
+
+            // Скрываем кружок вручную, чтобы не ждать базы
+            const badge = document.getElementById('badge_' + partnerUsername);
+            if (badge) badge.style.display = 'none';
+            updateTabTitle();
+
             const chatRef = ref(db, 'chats/' + currentRoomId);
             if (messagesListener) messagesListener(); 
 
@@ -440,6 +519,11 @@
                         e.preventDefault();
                         showContextMenu(e, msgId, msg.text, msgDiv);
                     });
+                } else {
+                    // Если сообщение от собеседника и мы в этом чате, отмечаем как прочитанное
+                    if (currentChatPartner === partnerUsername) {
+                        set(ref(db, `lastRead/${currentUser}/${currentRoomId}`), Date.now());
+                    }
                 }
                 chatContainer.appendChild(msgDiv);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -472,6 +556,8 @@
                 timestamp: Date.now()
             }).then(() => {
                 document.getElementById('message-input').value = "";
+                // Когда мы пишем, мы точно прочитали
+                set(ref(db, `lastRead/${currentUser}/${currentRoomId}`), Date.now());
             });
         };
 

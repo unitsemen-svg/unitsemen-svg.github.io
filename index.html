@@ -8,29 +8,36 @@
         * { box-sizing: border-box; }
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #e5e5ea; height: 100vh; display: flex; flex-direction: column; }
         
+        /* Экран входа */
         #auth-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: white; padding: 20px; }
         #auth-screen input { width: 100%; max-width: 300px; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
         #auth-screen button { width: 100%; max-width: 300px; padding: 12px; background: #007aff; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
         #auth-screen button.secondary { background: #6c757d; }
         #auth-error { color: red; font-size: 14px; margin-bottom: 10px; text-align: center; }
 
+        /* Основной интерфейс */
         #chat-screen { display: none; height: 100vh; flex-direction: row; }
         
+        /* Левая панель */
         #sidebar { width: 280px; background: #f8f9fa; border-right: 1px solid #ccc; display: flex; flex-direction: column; }
         #sidebar h3 { margin: 0; padding: 15px; background: #007aff; color: white; text-align: center; font-size: 16px; }
         #my-name-display { padding: 10px; font-size: 14px; border-bottom: 1px solid #ccc; background: #e2e6ea; display: flex; justify-content: space-between; align-items: center; }
         #logout-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 12px; }
         
-        #search-btn { margin: 10px; padding: 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; }
-        #search-btn:hover { background: #218838; }
+        /* Поиск */
+        #search-box { padding: 10px; background: #fff; border-bottom: 1px solid #ccc; }
+        #search-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; outline: none; }
 
+        /* Списки */
         #contacts-list, #all-users-list { flex: 1; overflow-y: auto; }
         .list-title { padding: 10px; font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold; background: #e9ecef; border-bottom: 1px solid #ccc; }
         
-        .contact { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; font-weight: bold; color: #333; }
+        .contact { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; font-weight: bold; color: #333; display: flex; flex-direction: column; }
         .contact:hover { background: #e2e6ea; }
         .contact.active { background: #dcf8c6; border-left: 4px solid #2ea44f; }
+        .contact small { font-weight: normal; color: #888; font-size: 12px; }
 
+        /* Правая панель (чат) */
         #chat-area { flex: 1; display: flex; flex-direction: column; background: #e5ddd5; overflow: hidden; }
         
         #chat-header { background: #fff; padding: 15px; border-bottom: 1px solid #ccc; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
@@ -51,6 +58,7 @@
         #input-area input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
         #input-area button { padding: 12px 20px; background: #007aff; color: white; border: none; border-radius: 20px; cursor: pointer; }
 
+        /* Меню */
         #context-menu {
             display: none; position: absolute; background: white; border: 1px solid #ccc;
             border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 1000; overflow: hidden;
@@ -61,6 +69,9 @@
         }
         #context-menu button:hover { background: #f0f0f0; }
         #context-menu button.danger { color: #dc3545; }
+
+        /* Кнопка смены ника */
+        #change-nick-btn { background: #ffc107; border: none; padding: 5px; border-radius: 3px; cursor: pointer; font-size: 10px; margin-top: 5px; }
         
         @media (max-width: 600px) {
             #chat-screen { flex-direction: column; }
@@ -79,7 +90,8 @@
     <div id="auth-screen">
         <h2>Добро пожаловать</h2>
         <div id="auth-error"></div>
-        <input type="text" id="reg-username" placeholder="Придумайте ник (латиница)">
+        <input type="text" id="reg-username" placeholder="Юзернейм (латиница, без @)">
+        <input type="text" id="reg-nickname" placeholder="Ваш ник (отображаемое имя)">
         <input type="password" id="reg-password" placeholder="Пароль (мин. 6 символов)">
         <button onclick="register()">Зарегистрироваться</button>
         <button class="secondary" onclick="login()">Войти</button>
@@ -89,18 +101,23 @@
         <div id="sidebar">
             <h3>Моя Соцсеть</h3>
             <div id="my-name-display">
-                <span id="my-username"></span>
+                <div>
+                    <span id="my-username"></span><br>
+                    <button id="change-nick-btn" onclick="changeNickname()">Сменить ник</button>
+                </div>
                 <button id="logout-btn" onclick="logout()">Выйти</button>
             </div>
-            
-            <button id="search-btn" onclick="toggleSearch()">🔍 Поиск людей</button>
+
+            <div id="search-box">
+                <input type="text" id="search-input" placeholder="Поиск по @юзернейму..." oninput="searchUsers()">
+            </div>
             
             <div id="contacts-list">
                 <div class="list-title">Мои контакты</div>
             </div>
             
             <div id="all-users-list" style="display: none;">
-                <div class="list-title" style="background:#d1ecf1; color:#0c5460;">Все пользователи</div>
+                <div class="list-title" style="background:#d1ecf1; color:#0c5460;">Результаты поиска</div>
             </div>
         </div>
         
@@ -135,16 +152,17 @@
   appId : "1:458746102805:web:b9504c82160fca249b7a1c" , 
   measurementId : "G-CEKD8FWHV7" 
 };
-
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const auth = getAuth(app);
         
         const emailDomain = "@mysite.com";
-        let currentUser = "";
-        let currentChatPartner = "";
+        let currentUser = ""; // @username
+        let currentNick = ""; // Отображаемое имя
+        let currentChatPartner = ""; // @username собеседника
         let currentRoomId = "";
         let messagesListener = null;
+        let allUsersData = {}; // Храним всех юзеров для поиска
 
         let selectedMsgId = null;
         let selectedMsgText = "";
@@ -156,114 +174,171 @@
         const chatTitle = document.getElementById('chat-title');
         const inputArea = document.getElementById('input-area');
         const errorDiv = document.getElementById('auth-error');
-        const searchBtn = document.getElementById('search-btn');
         const delContactChatBtn = document.getElementById('delete-contact-chat-btn');
         const contextMenu = document.getElementById('context-menu');
+        const searchInput = document.getElementById('search-input');
 
+        // 1. РЕГИСТРАЦИЯ
         window.register = async function() {
-            const user = document.getElementById('reg-username').value.trim().toLowerCase();
+            const user = document.getElementById('reg-username').value.trim().toLowerCase().replace('@', '');
+            const nick = document.getElementById('reg-nickname').value.trim();
             const pass = document.getElementById('reg-password').value;
             errorDiv.innerText = "";
-            if (user.length < 3) return errorDiv.innerText = "Ник должен быть больше 3 символов";
+
+            if (user.length < 3) return errorDiv.innerText = "Юзернейм должен быть больше 3 символов";
+            if (!nick) return errorDiv.innerText = "Введите ваш ник";
             if (pass.length < 6) return errorDiv.innerText = "Пароль должен быть больше 6 символов";
+
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, user + emailDomain, pass);
-                await set(ref(db, 'users/' + userCredential.user.uid), { username: user });
+                // Сохраняем юзернейм и ник в базу
+                await set(ref(db, 'users/' + user), { 
+                    username: user, 
+                    nickname: nick 
+                });
                 alert("Успешная регистрация!");
             } catch (error) {
-                errorDiv.innerText = "Ошибка: " + (error.code === 'auth/email-already-in-use' ? "Этот ник уже занят" : error.message);
+                errorDiv.innerText = "Ошибка: " + (error.code === 'auth/email-already-in-use' ? "Этот юзернейм уже занят" : error.message);
             }
         };
 
+        // 2. ВХОД
         window.login = async function() {
-            const user = document.getElementById('reg-username').value.trim().toLowerCase();
+            const user = document.getElementById('reg-username').value.trim().toLowerCase().replace('@', '');
             const pass = document.getElementById('reg-password').value;
             errorDiv.innerText = "";
+
             try {
                 await signInWithEmailAndPassword(auth, user + emailDomain, pass);
             } catch (error) {
-                errorDiv.innerText = "Неверный ник или пароль";
+                errorDiv.innerText = "Неверный юзернейм или пароль";
             }
         };
 
+        // 3. ВЫХОД
         window.logout = function() { signOut(auth); };
 
-        onAuthStateChanged(auth, (user) => {
+        // 4. АВТОРИЗАЦИЯ
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user.email.replace(emailDomain, "");
+                
+                // Загружаем данные текущего пользователя (ник)
+                const userRef = ref(db, 'users/' + currentUser);
+                const snapshot = await get(userRef);
+                if (snapshot.exists()) {
+                    currentNick = snapshot.val().nickname || currentUser;
+                } else {
+                    currentNick = currentUser;
+                }
+
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('chat-screen').style.display = 'flex';
-                document.getElementById('my-username').innerText = "Вы: " + currentUser;
+                document.getElementById('my-username').innerText = `@${currentUser} (${currentNick})`;
+                
                 loadAllUsers();
+                loadContacts();
             } else {
                 document.getElementById('auth-screen').style.display = 'flex';
                 document.getElementById('chat-screen').style.display = 'none';
                 document.getElementById('reg-username').value = "";
+                document.getElementById('reg-nickname').value = "";
                 document.getElementById('reg-password').value = "";
             }
         });
 
-        window.toggleSearch = function() {
-            if (allUsersList.style.display === 'none') {
-                allUsersList.style.display = 'block';
-                contactsList.style.display = 'none';
-                searchBtn.innerText = "⬅ Назад к контактам";
-                searchBtn.style.background = "#6c757d";
-            } else {
+        // 5. ПОИСК ЛЮДЕЙ (ТОЛЬКО ПО ЮЗЕРНЕЙМУ)
+        window.searchUsers = function() {
+            const query = searchInput.value.toLowerCase().trim().replace('@', '');
+            
+            if (query === "") {
                 allUsersList.style.display = 'none';
                 contactsList.style.display = 'block';
-                searchBtn.innerText = "🔍 Поиск людей";
-                searchBtn.style.background = "#28a745";
+                return;
+            }
+
+            allUsersList.style.display = 'block';
+            contactsList.style.display = 'none';
+            allUsersList.innerHTML = "<div class='list-title' style='background:#d1ecf1; color:#0c5460;'>Результаты поиска</div>";
+
+            let found = false;
+            for (const username in allUsersData) {
+                if (username === currentUser) continue;
+
+                // Ищем только по username
+                if (username.includes(query)) {
+                    found = true;
+                    const user = allUsersData[username];
+                    const divAll = document.createElement('div');
+                    divAll.className = 'contact';
+                    divAll.innerHTML = `<span>${user.nickname}</span><small>@${user.username}</small>`;
+                    divAll.onclick = () => {
+                        addToContacts(user.username);
+                        openChat(user.username, user.nickname);
+                        searchInput.value = ""; 
+                        searchUsers(); 
+                    };
+                    allUsersList.appendChild(divAll);
+                }
+            }
+
+            if (!found) {
+                allUsersList.innerHTML += "<div style='padding:10px;color:#888'>Никого не найдено</div>";
             }
         };
 
+        // 6. ЗАГРУЗКА ВСЕХ ПОЛЬЗОВАТЕЛЕЙ
         function loadAllUsers() {
             const usersRef = ref(db, 'users');
             get(usersRef).then((snapshot) => {
                 if (snapshot.exists()) {
-                    allUsersList.innerHTML = "<div class='list-title' style='background:#d1ecf1; color:#0c5460;'>Все пользователи</div>";
-                    const data = snapshot.val();
-                    for (const key in data) {
-                        const username = data[key].username;
-                        if (username !== currentUser) {
-                            const divAll = document.createElement('div');
-                            divAll.className = 'contact';
-                            divAll.innerText = username;
-                            divAll.onclick = () => {
-                                addToContacts(username);
-                                openChat(username, divAll);
-                                toggleSearch();
-                            };
-                            allUsersList.appendChild(divAll);
-                        }
-                    }
+                    allUsersData = snapshot.val();
                 }
             });
         }
 
-        function addToContacts(username) {
-            const existing = Array.from(contactsList.children).find(el => el.dataset.name === username);
-            if (!existing) {
-                const div = document.createElement('div');
-                div.className = 'contact';
-                div.dataset.name = username;
-                div.innerText = username;
-                div.onclick = () => openChat(username, div);
-                contactsList.appendChild(div);
-            }
+        // 7. ЗАГРУЗКА КОНТАКТОВ ИЗ БАЗЫ
+        function loadContacts() {
+            const contactsRef = ref(db, 'contacts/' + currentUser);
+            get(contactsRef).then((snapshot) => {
+                contactsList.innerHTML = "<div class='list-title'>Мои контакты</div>";
+                if (snapshot.exists()) {
+                    const contacts = snapshot.val();
+                    for (const partnerUsername in contacts) {
+                        const partnerNick = contacts[partnerUsername];
+                        const div = document.createElement('div');
+                        div.className = 'contact';
+                        div.dataset.name = partnerUsername;
+                        div.innerHTML = `<span>${partnerNick}</span><small>@${partnerUsername}</small>`;
+                        div.onclick = () => openChat(partnerUsername, partnerNick, div);
+                        contactsList.appendChild(div);
+                    }
+                } else {
+                    contactsList.innerHTML += "<div style='padding:10px;color:#888'>Список пуст</div>";
+                }
+            });
         }
 
-        function openChat(partner, element) {
+        // 8. ДОБАВЛЕНИЕ В КОНТАКТЫ
+        function addToContacts(partnerUsername) {
+            const partnerNick = allUsersData[partnerUsername] ? allUsersData[partnerUsername].nickname : partnerUsername;
+            set(ref(db, `contacts/${currentUser}/${partnerUsername}`), partnerNick).then(() => {
+                loadContacts();
+            });
+        }
+
+        // 9. ОТКРЫТИЕ ЧАТА
+        function openChat(partnerUsername, partnerNick, element) {
             document.querySelectorAll('.contact').forEach(c => c.classList.remove('active'));
-            element.classList.add('active');
+            if (element) element.classList.add('active');
             
-            currentChatPartner = partner;
-            chatTitle.innerText = "Чат с " + partner;
+            currentChatPartner = partnerUsername;
+            chatTitle.innerText = `Чат с ${partnerNick} (@${partnerUsername})`;
             delContactChatBtn.style.display = 'block';
             inputArea.style.display = 'flex';
             chatContainer.innerHTML = "";
             
-            const roomUsers = [currentUser, partner].sort();
+            const roomUsers = [currentUser, partnerUsername].sort();
             currentRoomId = "chat_" + roomUsers[0] + "_" + roomUsers[1];
             
             const chatRef = ref(db, 'chats/' + currentRoomId);
@@ -278,7 +353,8 @@
                 msgDiv.dataset.id = msgId;
                 msgDiv.dataset.text = msg.text || "";
                 
-                msgDiv.innerHTML = `<b style="font-size:12px;color:#666;display:block;">${msg.sender}</b> <span class="msg-content">${msg.text}</span>`;
+                const senderNick = msg.senderNick || msg.sender;
+                msgDiv.innerHTML = `<b style="font-size:12px;color:#666;display:block;">${senderNick}</b> <span class="msg-content">${msg.text}</span>`;
 
                 if (msg.sender === currentUser) {
                     msgDiv.addEventListener('contextmenu', (e) => {
@@ -292,26 +368,30 @@
             });
         }
 
+        // 10. УДАЛЕНИЕ КОНТАКТА
         window.deleteCurrentContact = function() {
             if (!currentChatPartner) return;
-            if (confirm(`Удалить ${currentChatPartner} из контактов?`)) {
-                const contactDiv = Array.from(contactsList.children).find(el => el.dataset.name === currentChatPartner);
-                if (contactDiv) contactDiv.remove();
-                chatContainer.innerHTML = "";
-                chatTitle.innerText = "Выберите контакт...";
-                inputArea.style.display = 'none';
-                delContactChatBtn.style.display = 'none';
-                currentRoomId = "";
-                currentChatPartner = "";
+            if (confirm(`Удалить @${currentChatPartner} из контактов?`)) {
+                remove(ref(db, `contacts/${currentUser}/${currentChatPartner}`)).then(() => {
+                    chatContainer.innerHTML = "";
+                    chatTitle.innerText = "Выберите контакт...";
+                    inputArea.style.display = 'none';
+                    delContactChatBtn.style.display = 'none';
+                    currentRoomId = "";
+                    currentChatPartner = "";
+                    loadContacts();
+                });
             }
         };
 
+        // 11. ОТПРАВКА СООБЩЕНИЯ
         window.sendMessage = function() {
             const text = document.getElementById('message-input').value.trim();
             if (text === "" || currentRoomId === "") return;
 
             push(ref(db, 'chats/' + currentRoomId), {
                 sender: currentUser,
+                senderNick: currentNick,
                 text: text,
                 timestamp: Date.now()
             }).then(() => {
@@ -319,11 +399,22 @@
             }).catch(err => alert("Ошибка: " + err.message));
         };
 
+        // 12. СМЕНА НИКА
+        window.changeNickname = async function() {
+            const newNick = prompt("Введите новый ник:", currentNick);
+            if (newNick && newNick.trim() !== "") {
+                await update(ref(db, 'users/' + currentUser), { nickname: newNick.trim() });
+                currentNick = newNick.trim();
+                document.getElementById('my-username').innerText = `@${currentUser} (${currentNick})`;
+                alert("Ник изменен!");
+            }
+        };
+
+        // 13. КОНТЕКСТНОЕ МЕНЮ
         function showContextMenu(e, msgId, msgText, msgDiv) {
             selectedMsgId = msgId;
             selectedMsgText = msgText;
             selectedMsgDiv = msgDiv;
-
             contextMenu.style.display = 'block';
             contextMenu.style.left = e.pageX + 'px';
             contextMenu.style.top = e.pageY + 'px';
@@ -338,22 +429,17 @@
         window.editMessage = function() {
             contextMenu.style.display = 'none';
             if (!selectedMsgId) return;
-
             const newText = prompt("Изменить сообщение:", selectedMsgText);
             if (newText !== null && newText.trim() !== "" && newText !== selectedMsgText) {
-                update(ref(db, 'chats/' + currentRoomId + '/' + selectedMsgId), {
-                    text: newText.trim()
-                });
+                update(ref(db, 'chats/' + currentRoomId + '/' + selectedMsgId), { text: newText.trim() });
                 const contentSpan = selectedMsgDiv.querySelector('.msg-content');
                 if (contentSpan) contentSpan.innerText = newText.trim();
-                selectedMsgDiv.dataset.text = newText.trim();
             }
         };
 
         window.deleteMessage = function() {
             contextMenu.style.display = 'none';
             if (!selectedMsgId) return;
-
             if (confirm("Удалить это сообщение?")) {
                 remove(ref(db, 'chats/' + currentRoomId + '/' + selectedMsgId));
                 selectedMsgDiv.remove();

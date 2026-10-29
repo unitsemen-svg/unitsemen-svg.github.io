@@ -49,7 +49,10 @@
         .req-actions button { padding: 5px 10px; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: bold; }
         .btn-accept { background: #28a745; color: white; }
         .btn-decline { background: #dc3545; color: white; }
+        
+        /* Кнопки в поиске */
         .btn-send-request { background: #007aff; color: white; padding: 5px 10px; border-radius: 3px; border: none; cursor: pointer; margin-top: 5px; font-size: 12px; }
+        .btn-chat { background: #28a745; color: white; padding: 5px 10px; border-radius: 3px; border: none; cursor: pointer; margin-top: 5px; font-size: 12px; }
 
         /* Правая панель (чат) */
         #chat-area { flex: 1; display: flex; flex-direction: column; background: #e5ddd5; overflow: hidden; }
@@ -129,7 +132,7 @@
             <!-- Поиск -->
             <div id="search-section">
                 <div id="search-box">
-                    <input type="text" id="search-input" placeholder="Поиск по @юзернейму..." oninput="searchUsers()">
+                    <input type="text" id="search-input" placeholder="Поиск по нику или @юзернейму..." oninput="searchUsers()">
                 </div>
                 <div id="all-users-list" style="display: none;">
                     <div class="list-title" style="background:#d1ecf1; color:#0c5460;">Результаты поиска</div>
@@ -191,8 +194,7 @@
         let currentRoomId = "";
         let messagesListener = null;
         let allUsersData = {}; 
-        let myContacts = []; // Массив юзернеймов моих контактов
-        let mySentRequests = []; // Кому я отправил заявку
+        let myContacts = []; 
 
         let selectedMsgId = null;
         let selectedMsgText = "";
@@ -242,7 +244,7 @@
 
         window.logout = function() { signOut(auth); };
 
-        // --- ИНИЦИАЛИЗАЦИЯ ПОСЛЕ ВХОДА ---
+        // --- ИНИЦИАЛИЗАЦИЯ ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user.email.replace(emailDomain, "");
@@ -255,7 +257,7 @@
                 
                 loadAllUsers();
                 loadContacts();
-                listenToRequests(); // Слушаем новые заявки в реальном времени
+                listenToRequests(); 
             } else {
                 document.getElementById('auth-screen').style.display = 'flex';
                 document.getElementById('chat-screen').style.display = 'none';
@@ -265,7 +267,7 @@
             }
         });
 
-        // --- ВКЛАДКИ (ПОИСК / ЗАЯВКИ) ---
+        // --- ВКЛАДКИ ---
         window.switchTab = function(tab) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
@@ -303,8 +305,6 @@
                         requestsList.appendChild(card);
                     }
                 }
-                
-                // Обновляем счетчик на вкладке
                 const badge = document.getElementById('req-badge');
                 badge.innerText = count > 0 ? `(${count})` : "";
                 badge.style.color = "#dc3545";
@@ -313,7 +313,6 @@
 
         window.sendFriendRequest = function(partnerUsername) {
             const partnerNick = allUsersData[partnerUsername].nickname;
-            // Отправляем заявку в ветку партнера
             set(ref(db, `friendRequests/${partnerUsername}/${currentUser}`), {
                 nickname: currentNick
             }).then(() => {
@@ -321,13 +320,19 @@
             });
         };
 
+        // ИСПРАВЛЕННАЯ ФУНКЦИЯ ПРИНЯТИЯ
         window.acceptRequest = function(fromUser, fromNick) {
-            // Добавляем друг друга в контакты
+            // 1. Добавляем друг друга в контакты
             set(ref(db, `contacts/${currentUser}/${fromUser}`), fromNick);
             set(ref(db, `contacts/${fromUser}/${currentUser}`), currentNick);
-            // Удаляем заявку
+            
+            // 2. Удаляем заявку
             remove(ref(db, `friendRequests/${currentUser}/${fromUser}`)).then(() => {
-                loadContacts();
+                loadContacts(); // Обновляем список контактов
+                
+                // 3. СРАЗУ ОТКРЫВАЕМ ЧАТ С ЭТИМ ЧЕЛОВЕКОМ (чтобы друг мог писать)
+                openChat(fromUser, fromNick);
+                alert(`Вы приняли заявку от ${fromNick}. Чат открыт!`);
             });
         };
 
@@ -364,8 +369,11 @@
             });
         }
 
+        // ИСПРАВЛЕННЫЙ ПОИСК (И ПО НИКУ, И ПО @ЮЗЕРНЕЙМУ)
         window.searchUsers = function() {
+            // Убираем @ и делаем запрос в нижнем регистре
             const query = searchInput.value.toLowerCase().trim().replace('@', '');
+            
             if (query === "") {
                 allUsersList.style.display = 'none';
                 contactsList.style.display = 'block';
@@ -380,32 +388,26 @@
             for (const username in allUsersData) {
                 if (username === currentUser) continue;
 
-                if (username.includes(query)) {
+                const userNick = allUsersData[username].nickname;
+
+                // Ищем совпадения И в юзернейме, И в нике
+                if (username.includes(query) || userNick.toLowerCase().includes(query)) {
                     found = true;
-                    const user = allUsersData[username];
                     const divAll = document.createElement('div');
                     divAll.className = 'contact';
                     
-                    // Проверяем, в контактах ли он уже
                     const isContact = myContacts.includes(username);
                     let btnHtml = "";
                     
                     if (isContact) {
-                        btnHtml = `<small style="color:#28a745; margin-top:5px;">В контактах</small>`;
+                        // Если уже в контактах, даем кнопку "Написать"
+                        btnHtml = `<button class="btn-chat" onclick="event.stopPropagation(); openChat('${username}', '${userNick}')">Написать</button>`;
                     } else {
+                        // Если нет - кнопку добавить
                         btnHtml = `<button class="btn-send-request" onclick="event.stopPropagation(); sendFriendRequest('${username}')">Добавить в друзья</button>`;
                     }
 
-                    divAll.innerHTML = `<span>${user.nickname}</span><small>@${user.username}</small>${btnHtml}`;
-                    
-                    // Если уже в контактах, при клике открываем чат
-                    if (isContact) {
-                        divAll.onclick = () => {
-                            openChat(user.username, user.nickname);
-                            searchInput.value = ""; 
-                            searchUsers(); 
-                        };
-                    }
+                    divAll.innerHTML = `<span>${userNick}</span><small>@${username}</small>${btnHtml}`;
                     
                     allUsersList.appendChild(divAll);
                 }
@@ -454,9 +456,7 @@
             if (!currentChatPartner) return;
             if (confirm(`Удалить @${currentChatPartner} из контактов?`)) {
                 remove(ref(db, `contacts/${currentUser}/${currentChatPartner}`)).then(() => {
-                    // Также удаляем себя из контактов у собеседника (опционально)
                     remove(ref(db, `contacts/${currentChatPartner}/${currentUser}`));
-                    
                     chatContainer.innerHTML = "";
                     chatTitle.innerText = "Выберите контакт...";
                     inputArea.style.display = 'none';

@@ -8,7 +8,7 @@
         * { box-sizing: border-box; }
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #e5e5ea; height: 100vh; display: flex; flex-direction: column; }
         
-        /* Экран входа/регистрации */
+        /* Экран входа */
         #auth-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: white; padding: 20px; }
         #auth-screen input { width: 100%; max-width: 300px; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
         #auth-screen button { width: 100%; max-width: 300px; padding: 12px; background: #007aff; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
@@ -17,15 +17,27 @@
 
         /* Основной интерфейс */
         #chat-screen { display: none; height: 100vh; flex-direction: row; }
-        #sidebar { width: 250px; background: #f8f9fa; border-right: 1px solid #ccc; display: flex; flex-direction: column; }
+        
+        /* Левая панель */
+        #sidebar { width: 280px; background: #f8f9fa; border-right: 1px solid #ccc; display: flex; flex-direction: column; }
         #sidebar h3 { margin: 0; padding: 15px; background: #007aff; color: white; text-align: center; font-size: 16px; }
         #my-name-display { padding: 10px; font-size: 14px; border-bottom: 1px solid #ccc; background: #e2e6ea; display: flex; justify-content: space-between; align-items: center; }
         #logout-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 12px; }
-        #contacts-list { flex: 1; overflow-y: auto; }
-        .contact { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; font-weight: bold; color: #333; }
+        
+        /* Кнопка поиска */
+        #search-btn { margin: 10px; padding: 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        #search-btn:hover { background: #218838; }
+
+        /* Списки */
+        #contacts-list, #all-users-list { flex: 1; overflow-y: auto; }
+        .list-title { padding: 10px; font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold; background: #e9ecef; border-bottom: 1px solid #ccc; }
+        
+        .contact { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; font-weight: bold; color: #333; display: flex; justify-content: space-between; align-items: center; }
         .contact:hover { background: #e2e6ea; }
         .contact.active { background: #dcf8c6; border-left: 4px solid #2ea44f; }
-        
+        .status-online { font-size: 12px; color: #28a745; }
+
+        /* Правая панель (чат) */
         #chat-area { flex: 1; display: flex; flex-direction: column; background: #e5ddd5; }
         #chat-header { background: #fff; padding: 15px; border-bottom: 1px solid #ccc; font-weight: bold; }
         #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
@@ -39,8 +51,8 @@
         
         @media (max-width: 600px) {
             #chat-screen { flex-direction: column; }
-            #sidebar { width: 100%; height: 35vh; flex: none; }
-            #chat-area { height: 65vh; }
+            #sidebar { width: 100%; height: 45vh; flex: none; }
+            #chat-area { height: 55vh; }
         }
     </style>
 </head>
@@ -50,7 +62,7 @@
     <div id="auth-screen">
         <h2>Добро пожаловать</h2>
         <div id="auth-error"></div>
-        <input type="text" id="reg-username" placeholder="Придумайте ник (только латиница)">
+        <input type="text" id="reg-username" placeholder="Придумайте ник (латиница)">
         <input type="password" id="reg-password" placeholder="Пароль (мин. 6 символов)">
         <button onclick="register()">Зарегистрироваться</button>
         <button class="secondary" onclick="login()">Войти</button>
@@ -59,12 +71,22 @@
     <!-- Экран Соцсети -->
     <div id="chat-screen">
         <div id="sidebar">
-            <h3>Контакты</h3>
+            <h3>Моя Соцсеть</h3>
             <div id="my-name-display">
                 <span id="my-username"></span>
                 <button id="logout-btn" onclick="logout()">Выйти</button>
             </div>
-            <div id="contacts-list"></div>
+            
+            <!-- Кнопка поиска -->
+            <button id="search-btn" onclick="toggleSearch()">🔍 Поиск людей</button>
+            
+            <div id="contacts-list">
+                <div class="list-title">Мои контакты</div>
+            </div>
+            
+            <div id="all-users-list" style="display: none;">
+                <div class="list-title" style="background:#d1ecf1; color:#0c5460;">Все пользователи</div>
+            </div>
         </div>
         
         <div id="chat-area">
@@ -98,16 +120,19 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
         
-        const emailDomain = "@mysite.com"; // Фейковый домен для почты
+        const emailDomain = "@mysite.com";
         let currentUser = "";
         let currentRoomId = "";
         let messagesListener = null;
+        let allUsers = []; // Массив для хранения всех людей
         
         const chatContainer = document.getElementById('messages');
         const contactsList = document.getElementById('contacts-list');
+        const allUsersList = document.getElementById('all-users-list');
         const header = document.getElementById('chat-header');
         const inputArea = document.getElementById('input-area');
         const errorDiv = document.getElementById('auth-error');
+        const searchBtn = document.getElementById('search-btn');
 
         // 1. РЕГИСТРАЦИЯ
         window.register = async function() {
@@ -119,9 +144,7 @@
             if (pass.length < 6) return errorDiv.innerText = "Пароль должен быть больше 6 символов";
 
             try {
-                // Создаем пользователя в Firebase
                 const userCredential = await createUserWithEmailAndPassword(auth, user + emailDomain, pass);
-                // Сохраняем ник в базу, чтобы другие видели его
                 await set(ref(db, 'users/' + userCredential.user.uid), { username: user });
                 alert("Успешная регистрация!");
             } catch (error) {
@@ -147,14 +170,14 @@
             signOut(auth);
         };
 
-        // 4. АВТОМАТИЧЕСКАЯ ПРОВЕРКА (Вошли мы или нет)
+        // 4. ПРОВЕРКА АВТОРИЗАЦИИ
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user.email.replace(emailDomain, "");
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('chat-screen').style.display = 'flex';
                 document.getElementById('my-username').innerText = "Вы: " + currentUser;
-                loadAllUsers();
+                loadAllUsers(); // Загружаем всех людей при входе
             } else {
                 document.getElementById('auth-screen').style.display = 'flex';
                 document.getElementById('chat-screen').style.display = 'none';
@@ -163,31 +186,68 @@
             }
         });
 
-        // 5. ЗАГРУЗКА СПИСКА ВСЕХ ПОЛЬЗОВАТЕЛЕЙ
+        // 5. ПЕРЕКЛЮЧАТЕЛЬ ПОИСКА
+        window.toggleSearch = function() {
+            if (allUsersList.style.display === 'none') {
+                allUsersList.style.display = 'block';
+                contactsList.style.display = 'none';
+                searchBtn.innerText = "⬅ Назад к контактам";
+                searchBtn.style.background = "#6c757d";
+            } else {
+                allUsersList.style.display = 'none';
+                contactsList.style.display = 'block';
+                searchBtn.innerText = "🔍 Поиск людей";
+                searchBtn.style.background = "#28a745";
+            }
+        };
+
+        // 6. ЗАГРУЗКА ВСЕХ ПОЛЬЗОВАТЕЛЕЙ
         function loadAllUsers() {
             const usersRef = ref(db, 'users');
             get(usersRef).then((snapshot) => {
                 if (snapshot.exists()) {
-                    contactsList.innerHTML = "";
+                    allUsers = []; // Очищаем старый список
                     const data = snapshot.val();
                     for (const key in data) {
                         const username = data[key].username;
                         if (username !== currentUser) {
-                            const div = document.createElement('div');
-                            div.className = 'contact';
-                            div.innerText = username;
-                            div.onclick = () => openChat(username, div);
-                            contactsList.appendChild(div);
+                            allUsers.push(username);
+                            
+                            // Отрисовываем в "Все пользователи"
+                            const divAll = document.createElement('div');
+                            divAll.className = 'contact';
+                            divAll.innerHTML = `${username} <span class="status-online">в сети</span>`;
+                            divAll.onclick = () => {
+                                addToContacts(username); // Добавляем в контакты при клике
+                                openChat(username, divAll);
+                                toggleSearch(); // Скрываем поиск
+                            };
+                            allUsersList.appendChild(divAll);
                         }
                     }
                 } else {
-                    contactsList.innerHTML = "<div style='padding:10px;color:#888'>Пока никого нет...</div>";
+                    allUsersList.innerHTML = "<div style='padding:10px;color:#888'>Пока никого нет...</div>";
                 }
             });
         }
 
-        // 6. ОТКРЫТИЕ ЧАТА
+        // 7. ДОБАВЛЕНИЕ В КОНТАКТЫ (визуально)
+        function addToContacts(username) {
+            // Проверяем, есть ли уже такой контакт в списке
+            const existing = Array.from(contactsList.children).find(el => el.dataset.name === username);
+            if (!existing) {
+                const div = document.createElement('div');
+                div.className = 'contact';
+                div.dataset.name = username;
+                div.innerText = username;
+                div.onclick = () => openChat(username, div);
+                contactsList.appendChild(div);
+            }
+        }
+
+        // 8. ОТКРЫТИЕ ЧАТА
         function openChat(partner, element) {
+            // Убираем активный класс со всех
             document.querySelectorAll('.contact').forEach(c => c.classList.remove('active'));
             element.classList.add('active');
             
@@ -211,7 +271,7 @@
             });
         }
 
-        // 7. ОТПРАВКА СООБЩЕНИЯ
+        // 9. ОТПРАВКА СООБЩЕНИЯ
         window.sendMessage = function() {
             const text = document.getElementById('message-input').value.trim();
             if (text === "" || currentRoomId === "") return;

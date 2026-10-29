@@ -32,18 +32,33 @@
         #contacts-list, #all-users-list { flex: 1; overflow-y: auto; }
         .list-title { padding: 10px; font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold; background: #e9ecef; border-bottom: 1px solid #ccc; }
         
-        .contact { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; font-weight: bold; color: #333; display: flex; justify-content: space-between; align-items: center; }
+        .contact-wrapper { display: flex; border-bottom: 1px solid #eee; }
+        .contact { flex: 1; padding: 15px; cursor: pointer; font-weight: bold; color: #333; }
         .contact:hover { background: #e2e6ea; }
         .contact.active { background: #dcf8c6; border-left: 4px solid #2ea44f; }
-        .status-online { font-size: 12px; color: #28a745; }
+        
+        /* Кнопка удаления контакта */
+        .delete-contact-btn { background: #ff4d4d; color: white; border: none; padding: 0 15px; cursor: pointer; font-size: 16px; }
+        .delete-contact-btn:hover { background: #cc0000; }
 
         /* Правая панель (чат) */
         #chat-area { flex: 1; display: flex; flex-direction: column; background: #e5ddd5; }
         #chat-header { background: #fff; padding: 15px; border-bottom: 1px solid #ccc; font-weight: bold; }
         #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
-        .message { margin-bottom: 15px; padding: 10px 15px; border-radius: 15px; max-width: 70%; font-size: 15px; word-wrap: break-word; }
+        
+        /* Сообщения */
+        .message { margin-bottom: 15px; padding: 10px 15px; border-radius: 15px; max-width: 70%; font-size: 15px; word-wrap: break-word; position: relative; }
         .my-msg { background: #dcf8c6; align-self: flex-end; border-bottom-right-radius: 2px; }
         .other-msg { background: #fff; align-self: flex-start; border-bottom-left-radius: 2px; }
+        
+        /* Кнопка удаления сообщения */
+        .delete-msg-btn { 
+            position: absolute; top: -5px; right: -5px; background: #ff4d4d; color: white; 
+            border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; 
+            cursor: pointer; display: none; align-items: center; justify-content: center; 
+        }
+        .my-msg:hover .delete-msg-btn { display: flex; } /* Показываем только при наведении на свое сообщение */
+        .delete-msg-btn:hover { background: #cc0000; }
         
         #input-area { display: flex; padding: 10px; background: #f0f0f0; gap: 10px; }
         #input-area input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
@@ -77,7 +92,6 @@
                 <button id="logout-btn" onclick="logout()">Выйти</button>
             </div>
             
-            <!-- Кнопка поиска -->
             <button id="search-btn" onclick="toggleSearch()">🔍 Поиск людей</button>
             
             <div id="contacts-list">
@@ -101,11 +115,12 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        // ДОБАВЛЕНА ФУНКЦИЯ remove ДЛЯ УДАЛЕНИЯ
+        import { getDatabase, ref, push, onChildAdded, set, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         // ⚠️ ВСТАВЬТЕ СЮДА ВАШИ ДАННЫЕ ИЗ FIREBASE
-        const firebaseConfig = { 
+      const firebaseConfig = { 
   apiKey : "AIzaSyAkBvVaf0_KNZ4sVDfMtuziGCGBQwUq55E" , 
   authDomain : "find-dude.firebaseapp.com" , 
   databaseURL : "https://find-dude-default-rtdb.firebaseio.com" , 
@@ -124,7 +139,7 @@
         let currentUser = "";
         let currentRoomId = "";
         let messagesListener = null;
-        let allUsers = []; // Массив для хранения всех людей
+        let allUsers = [];
         
         const chatContainer = document.getElementById('messages');
         const contactsList = document.getElementById('contacts-list');
@@ -177,7 +192,7 @@
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('chat-screen').style.display = 'flex';
                 document.getElementById('my-username').innerText = "Вы: " + currentUser;
-                loadAllUsers(); // Загружаем всех людей при входе
+                loadAllUsers();
             } else {
                 document.getElementById('auth-screen').style.display = 'flex';
                 document.getElementById('chat-screen').style.display = 'none';
@@ -206,48 +221,68 @@
             const usersRef = ref(db, 'users');
             get(usersRef).then((snapshot) => {
                 if (snapshot.exists()) {
-                    allUsers = []; // Очищаем старый список
+                    allUsersList.innerHTML = "<div class='list-title' style='background:#d1ecf1; color:#0c5460;'>Все пользователи</div>";
+                    allUsers = [];
                     const data = snapshot.val();
                     for (const key in data) {
                         const username = data[key].username;
                         if (username !== currentUser) {
                             allUsers.push(username);
                             
-                            // Отрисовываем в "Все пользователи"
                             const divAll = document.createElement('div');
                             divAll.className = 'contact';
-                            divAll.innerHTML = `${username} <span class="status-online">в сети</span>`;
+                            divAll.innerText = username;
                             divAll.onclick = () => {
-                                addToContacts(username); // Добавляем в контакты при клике
+                                addToContacts(username);
                                 openChat(username, divAll);
-                                toggleSearch(); // Скрываем поиск
+                                toggleSearch();
                             };
                             allUsersList.appendChild(divAll);
                         }
                     }
-                } else {
-                    allUsersList.innerHTML = "<div style='padding:10px;color:#888'>Пока никого нет...</div>";
                 }
             });
         }
 
-        // 7. ДОБАВЛЕНИЕ В КОНТАКТЫ (визуально)
+        // 7. ДОБАВЛЕНИЕ В КОНТАКТЫ
         function addToContacts(username) {
-            // Проверяем, есть ли уже такой контакт в списке
             const existing = Array.from(contactsList.children).find(el => el.dataset.name === username);
             if (!existing) {
+                // Создаем обертку для контакта и кнопки удаления
+                const wrapper = document.createElement('div');
+                wrapper.className = 'contact-wrapper';
+                wrapper.dataset.name = username;
+                
                 const div = document.createElement('div');
                 div.className = 'contact';
-                div.dataset.name = username;
                 div.innerText = username;
                 div.onclick = () => openChat(username, div);
-                contactsList.appendChild(div);
+                
+                // Кнопка удаления контакта
+                const delBtn = document.createElement('button');
+                delBtn.className = 'delete-contact-btn';
+                delBtn.innerText = '✖';
+                delBtn.title = "Удалить из контактов";
+                delBtn.onclick = (e) => {
+                    e.stopPropagation(); // Чтобы не открывался чат
+                    wrapper.remove();
+                    // Если этот контакт был открыт, очищаем экран
+                    if (currentRoomId.includes(username)) {
+                        chatContainer.innerHTML = "";
+                        header.innerText = "Выберите контакт...";
+                        inputArea.style.display = "none";
+                        currentRoomId = "";
+                    }
+                };
+
+                wrapper.appendChild(div);
+                wrapper.appendChild(delBtn);
+                contactsList.appendChild(wrapper);
             }
         }
 
         // 8. ОТКРЫТИЕ ЧАТА
         function openChat(partner, element) {
-            // Убираем активный класс со всех
             document.querySelectorAll('.contact').forEach(c => c.classList.remove('active'));
             element.classList.add('active');
             
@@ -263,9 +298,30 @@
 
             messagesListener = onChildAdded(chatRef, (data) => {
                 const msg = data.val();
+                const msgId = data.key; // Получаем уникальный ID сообщения для удаления
+                
                 const msgDiv = document.createElement('div');
                 msgDiv.className = 'message ' + (msg.sender === currentUser ? 'my-msg' : 'other-msg');
+                
+                // Текст сообщения
                 msgDiv.innerHTML = `<b style="font-size:12px;color:#666;display:block;">${msg.sender}</b> ${msg.text}`;
+
+                // Если сообщение наше — добавляем кнопку удаления
+                if (msg.sender === currentUser) {
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'delete-msg-btn';
+                    delBtn.innerHTML = '✖';
+                    delBtn.title = "Удалить сообщение";
+                    delBtn.onclick = () => {
+                        if (confirm("Удалить это сообщение для всех?")) {
+                            // Удаляем из базы данных
+                            remove(ref(db, 'chats/' + currentRoomId + '/' + msgId));
+                            msgDiv.remove(); // Удаляем с экрана
+                        }
+                    };
+                    msgDiv.appendChild(delBtn);
+                }
+
                 chatContainer.appendChild(msgDiv);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             });

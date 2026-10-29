@@ -8,61 +8,59 @@
         * { box-sizing: border-box; }
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #e5e5ea; height: 100vh; display: flex; flex-direction: column; }
         
-        /* Экран входа */
         #auth-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: white; padding: 20px; }
         #auth-screen input { width: 100%; max-width: 300px; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
         #auth-screen button { width: 100%; max-width: 300px; padding: 12px; background: #007aff; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
         #auth-screen button.secondary { background: #6c757d; }
         #auth-error { color: red; font-size: 14px; margin-bottom: 10px; text-align: center; }
 
-        /* Основной интерфейс */
         #chat-screen { display: none; height: 100vh; flex-direction: row; }
         
-        /* Левая панель */
         #sidebar { width: 280px; background: #f8f9fa; border-right: 1px solid #ccc; display: flex; flex-direction: column; }
         #sidebar h3 { margin: 0; padding: 15px; background: #007aff; color: white; text-align: center; font-size: 16px; }
         #my-name-display { padding: 10px; font-size: 14px; border-bottom: 1px solid #ccc; background: #e2e6ea; display: flex; justify-content: space-between; align-items: center; }
         #logout-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 12px; }
         
-        /* Кнопка поиска */
         #search-btn { margin: 10px; padding: 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; }
         #search-btn:hover { background: #218838; }
 
-        /* Списки */
         #contacts-list, #all-users-list { flex: 1; overflow-y: auto; }
         .list-title { padding: 10px; font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold; background: #e9ecef; border-bottom: 1px solid #ccc; }
         
-        .contact-wrapper { display: flex; border-bottom: 1px solid #eee; }
-        .contact { flex: 1; padding: 15px; cursor: pointer; font-weight: bold; color: #333; }
+        .contact { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; font-weight: bold; color: #333; }
         .contact:hover { background: #e2e6ea; }
         .contact.active { background: #dcf8c6; border-left: 4px solid #2ea44f; }
-        
-        /* Кнопка удаления контакта */
-        .delete-contact-btn { background: #ff4d4d; color: white; border: none; padding: 0 15px; cursor: pointer; font-size: 16px; }
-        .delete-contact-btn:hover { background: #cc0000; }
 
-        /* Правая панель (чат) */
-        #chat-area { flex: 1; display: flex; flex-direction: column; background: #e5ddd5; }
-        #chat-header { background: #fff; padding: 15px; border-bottom: 1px solid #ccc; font-weight: bold; }
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
+        #chat-area { flex: 1; display: flex; flex-direction: column; background: #e5ddd5; overflow: hidden; }
         
-        /* Сообщения */
-        .message { margin-bottom: 15px; padding: 10px 15px; border-radius: 15px; max-width: 70%; font-size: 15px; word-wrap: break-word; position: relative; }
+        #chat-header { background: #fff; padding: 15px; border-bottom: 1px solid #ccc; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        #delete-contact-chat-btn { background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 14px; display: none; }
+        #delete-contact-chat-btn:hover { background: #cc0000; }
+
+        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; overflow-x: hidden; }
+        
+        .message { 
+            margin-bottom: 15px; padding: 10px 15px; border-radius: 15px; max-width: 75%; font-size: 15px; 
+            word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: pre-wrap; 
+            position: relative; cursor: context-menu; 
+        }
         .my-msg { background: #dcf8c6; align-self: flex-end; border-bottom-right-radius: 2px; }
         .other-msg { background: #fff; align-self: flex-start; border-bottom-left-radius: 2px; }
         
-        /* Кнопка удаления сообщения */
-        .delete-msg-btn { 
-            position: absolute; top: -5px; right: -5px; background: #ff4d4d; color: white; 
-            border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; 
-            cursor: pointer; display: none; align-items: center; justify-content: center; 
-        }
-        .my-msg:hover .delete-msg-btn { display: flex; } /* Показываем только при наведении на свое сообщение */
-        .delete-msg-btn:hover { background: #cc0000; }
-        
-        #input-area { display: flex; padding: 10px; background: #f0f0f0; gap: 10px; }
-        #input-area input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
+        #input-area { display: flex; padding: 10px; background: #f0f0f0; gap: 10px; align-items: center; }
+        #input-area input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
         #input-area button { padding: 12px 20px; background: #007aff; color: white; border: none; border-radius: 20px; cursor: pointer; }
+
+        #context-menu {
+            display: none; position: absolute; background: white; border: 1px solid #ccc;
+            border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 1000; overflow: hidden;
+        }
+        #context-menu button {
+            display: block; width: 100%; padding: 10px 20px; border: none; background: none;
+            text-align: left; cursor: pointer; font-size: 14px; color: #333;
+        }
+        #context-menu button:hover { background: #f0f0f0; }
+        #context-menu button.danger { color: #dc3545; }
         
         @media (max-width: 600px) {
             #chat-screen { flex-direction: column; }
@@ -73,7 +71,11 @@
 </head>
 <body>
 
-    <!-- Экран Входа / Регистрации -->
+    <div id="context-menu">
+        <button onclick="editMessage()">Изменить</button>
+        <button class="danger" onclick="deleteMessage()">Удалить</button>
+    </div>
+
     <div id="auth-screen">
         <h2>Добро пожаловать</h2>
         <div id="auth-error"></div>
@@ -83,7 +85,6 @@
         <button class="secondary" onclick="login()">Войти</button>
     </div>
 
-    <!-- Экран Соцсети -->
     <div id="chat-screen">
         <div id="sidebar">
             <h3>Моя Соцсеть</h3>
@@ -104,8 +105,13 @@
         </div>
         
         <div id="chat-area">
-            <div id="chat-header">Выберите контакт...</div>
+            <div id="chat-header">
+                <span id="chat-title">Выберите контакт...</span>
+                <button id="delete-contact-chat-btn" onclick="deleteCurrentContact()">Удалить контакт ✖</button>
+            </div>
+            
             <div id="messages"></div>
+            
             <div id="input-area" style="display: none;">
                 <input type="text" id="message-input" placeholder="Сообщение...">
                 <button onclick="sendMessage()">➤</button>
@@ -115,12 +121,11 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        // ДОБАВЛЕНА ФУНКЦИЯ remove ДЛЯ УДАЛЕНИЯ
-        import { getDatabase, ref, push, onChildAdded, set, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, set, get, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         // ⚠️ ВСТАВЬТЕ СЮДА ВАШИ ДАННЫЕ ИЗ FIREBASE
-      const firebaseConfig = { 
+       const firebaseConfig = { 
   apiKey : "AIzaSyAkBvVaf0_KNZ4sVDfMtuziGCGBQwUq55E" , 
   authDomain : "find-dude.firebaseapp.com" , 
   databaseURL : "https://find-dude-default-rtdb.firebaseio.com" , 
@@ -137,27 +142,30 @@
         
         const emailDomain = "@mysite.com";
         let currentUser = "";
+        let currentChatPartner = "";
         let currentRoomId = "";
         let messagesListener = null;
-        let allUsers = [];
-        
+
+        let selectedMsgId = null;
+        let selectedMsgText = "";
+        let selectedMsgDiv = null;
+
         const chatContainer = document.getElementById('messages');
         const contactsList = document.getElementById('contacts-list');
         const allUsersList = document.getElementById('all-users-list');
-        const header = document.getElementById('chat-header');
+        const chatTitle = document.getElementById('chat-title');
         const inputArea = document.getElementById('input-area');
         const errorDiv = document.getElementById('auth-error');
         const searchBtn = document.getElementById('search-btn');
+        const delContactChatBtn = document.getElementById('delete-contact-chat-btn');
+        const contextMenu = document.getElementById('context-menu');
 
-        // 1. РЕГИСТРАЦИЯ
         window.register = async function() {
             const user = document.getElementById('reg-username').value.trim().toLowerCase();
             const pass = document.getElementById('reg-password').value;
             errorDiv.innerText = "";
-
             if (user.length < 3) return errorDiv.innerText = "Ник должен быть больше 3 символов";
             if (pass.length < 6) return errorDiv.innerText = "Пароль должен быть больше 6 символов";
-
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, user + emailDomain, pass);
                 await set(ref(db, 'users/' + userCredential.user.uid), { username: user });
@@ -167,12 +175,10 @@
             }
         };
 
-        // 2. ВХОД
         window.login = async function() {
             const user = document.getElementById('reg-username').value.trim().toLowerCase();
             const pass = document.getElementById('reg-password').value;
             errorDiv.innerText = "";
-
             try {
                 await signInWithEmailAndPassword(auth, user + emailDomain, pass);
             } catch (error) {
@@ -180,12 +186,8 @@
             }
         };
 
-        // 3. ВЫХОД
-        window.logout = function() {
-            signOut(auth);
-        };
+        window.logout = function() { signOut(auth); };
 
-        // 4. ПРОВЕРКА АВТОРИЗАЦИИ
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user.email.replace(emailDomain, "");
@@ -201,7 +203,6 @@
             }
         });
 
-        // 5. ПЕРЕКЛЮЧАТЕЛЬ ПОИСКА
         window.toggleSearch = function() {
             if (allUsersList.style.display === 'none') {
                 allUsersList.style.display = 'block';
@@ -216,19 +217,15 @@
             }
         };
 
-        // 6. ЗАГРУЗКА ВСЕХ ПОЛЬЗОВАТЕЛЕЙ
         function loadAllUsers() {
             const usersRef = ref(db, 'users');
             get(usersRef).then((snapshot) => {
                 if (snapshot.exists()) {
                     allUsersList.innerHTML = "<div class='list-title' style='background:#d1ecf1; color:#0c5460;'>Все пользователи</div>";
-                    allUsers = [];
                     const data = snapshot.val();
                     for (const key in data) {
                         const username = data[key].username;
                         if (username !== currentUser) {
-                            allUsers.push(username);
-                            
                             const divAll = document.createElement('div');
                             divAll.className = 'contact';
                             divAll.innerText = username;
@@ -244,49 +241,25 @@
             });
         }
 
-        // 7. ДОБАВЛЕНИЕ В КОНТАКТЫ
         function addToContacts(username) {
             const existing = Array.from(contactsList.children).find(el => el.dataset.name === username);
             if (!existing) {
-                // Создаем обертку для контакта и кнопки удаления
-                const wrapper = document.createElement('div');
-                wrapper.className = 'contact-wrapper';
-                wrapper.dataset.name = username;
-                
                 const div = document.createElement('div');
                 div.className = 'contact';
+                div.dataset.name = username;
                 div.innerText = username;
                 div.onclick = () => openChat(username, div);
-                
-                // Кнопка удаления контакта
-                const delBtn = document.createElement('button');
-                delBtn.className = 'delete-contact-btn';
-                delBtn.innerText = '✖';
-                delBtn.title = "Удалить из контактов";
-                delBtn.onclick = (e) => {
-                    e.stopPropagation(); // Чтобы не открывался чат
-                    wrapper.remove();
-                    // Если этот контакт был открыт, очищаем экран
-                    if (currentRoomId.includes(username)) {
-                        chatContainer.innerHTML = "";
-                        header.innerText = "Выберите контакт...";
-                        inputArea.style.display = "none";
-                        currentRoomId = "";
-                    }
-                };
-
-                wrapper.appendChild(div);
-                wrapper.appendChild(delBtn);
-                contactsList.appendChild(wrapper);
+                contactsList.appendChild(div);
             }
         }
 
-        // 8. ОТКРЫТИЕ ЧАТА
         function openChat(partner, element) {
             document.querySelectorAll('.contact').forEach(c => c.classList.remove('active'));
             element.classList.add('active');
             
-            header.innerText = "Чат с " + partner;
+            currentChatPartner = partner;
+            chatTitle.innerText = "Чат с " + partner;
+            delContactChatBtn.style.display = 'block';
             inputArea.style.display = 'flex';
             chatContainer.innerHTML = "";
             
@@ -298,28 +271,20 @@
 
             messagesListener = onChildAdded(chatRef, (data) => {
                 const msg = data.val();
-                const msgId = data.key; // Получаем уникальный ID сообщения для удаления
+                const msgId = data.key;
                 
                 const msgDiv = document.createElement('div');
                 msgDiv.className = 'message ' + (msg.sender === currentUser ? 'my-msg' : 'other-msg');
+                msgDiv.dataset.id = msgId;
+                msgDiv.dataset.text = msg.text || "";
                 
-                // Текст сообщения
-                msgDiv.innerHTML = `<b style="font-size:12px;color:#666;display:block;">${msg.sender}</b> ${msg.text}`;
+                msgDiv.innerHTML = `<b style="font-size:12px;color:#666;display:block;">${msg.sender}</b> <span class="msg-content">${msg.text}</span>`;
 
-                // Если сообщение наше — добавляем кнопку удаления
                 if (msg.sender === currentUser) {
-                    const delBtn = document.createElement('button');
-                    delBtn.className = 'delete-msg-btn';
-                    delBtn.innerHTML = '✖';
-                    delBtn.title = "Удалить сообщение";
-                    delBtn.onclick = () => {
-                        if (confirm("Удалить это сообщение для всех?")) {
-                            // Удаляем из базы данных
-                            remove(ref(db, 'chats/' + currentRoomId + '/' + msgId));
-                            msgDiv.remove(); // Удаляем с экрана
-                        }
-                    };
-                    msgDiv.appendChild(delBtn);
+                    msgDiv.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        showContextMenu(e, msgId, msg.text, msgDiv);
+                    });
                 }
 
                 chatContainer.appendChild(msgDiv);
@@ -327,7 +292,20 @@
             });
         }
 
-        // 9. ОТПРАВКА СООБЩЕНИЯ
+        window.deleteCurrentContact = function() {
+            if (!currentChatPartner) return;
+            if (confirm(`Удалить ${currentChatPartner} из контактов?`)) {
+                const contactDiv = Array.from(contactsList.children).find(el => el.dataset.name === currentChatPartner);
+                if (contactDiv) contactDiv.remove();
+                chatContainer.innerHTML = "";
+                chatTitle.innerText = "Выберите контакт...";
+                inputArea.style.display = 'none';
+                delContactChatBtn.style.display = 'none';
+                currentRoomId = "";
+                currentChatPartner = "";
+            }
+        };
+
         window.sendMessage = function() {
             const text = document.getElementById('message-input').value.trim();
             if (text === "" || currentRoomId === "") return;
@@ -339,6 +317,47 @@
             }).then(() => {
                 document.getElementById('message-input').value = "";
             }).catch(err => alert("Ошибка: " + err.message));
+        };
+
+        function showContextMenu(e, msgId, msgText, msgDiv) {
+            selectedMsgId = msgId;
+            selectedMsgText = msgText;
+            selectedMsgDiv = msgDiv;
+
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = e.pageX + 'px';
+            contextMenu.style.top = e.pageY + 'px';
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!contextMenu.contains(e.target)) {
+                contextMenu.style.display = 'none';
+            }
+        });
+
+        window.editMessage = function() {
+            contextMenu.style.display = 'none';
+            if (!selectedMsgId) return;
+
+            const newText = prompt("Изменить сообщение:", selectedMsgText);
+            if (newText !== null && newText.trim() !== "" && newText !== selectedMsgText) {
+                update(ref(db, 'chats/' + currentRoomId + '/' + selectedMsgId), {
+                    text: newText.trim()
+                });
+                const contentSpan = selectedMsgDiv.querySelector('.msg-content');
+                if (contentSpan) contentSpan.innerText = newText.trim();
+                selectedMsgDiv.dataset.text = newText.trim();
+            }
+        };
+
+        window.deleteMessage = function() {
+            contextMenu.style.display = 'none';
+            if (!selectedMsgId) return;
+
+            if (confirm("Удалить это сообщение?")) {
+                remove(ref(db, 'chats/' + currentRoomId + '/' + selectedMsgId));
+                selectedMsgDiv.remove();
+            }
         };
 
         document.getElementById('message-input').addEventListener('keypress', (e) => {

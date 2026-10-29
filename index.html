@@ -19,17 +19,22 @@
         #chat-screen { display: none; height: 100vh; flex-direction: row; }
         
         /* Левая панель */
-        #sidebar { width: 280px; background: #f8f9fa; border-right: 1px solid #ccc; display: flex; flex-direction: column; }
+        #sidebar { width: 300px; background: #f8f9fa; border-right: 1px solid #ccc; display: flex; flex-direction: column; }
         #sidebar h3 { margin: 0; padding: 15px; background: #007aff; color: white; text-align: center; font-size: 16px; }
         #my-name-display { padding: 10px; font-size: 14px; border-bottom: 1px solid #ccc; background: #e2e6ea; display: flex; justify-content: space-between; align-items: center; }
         #logout-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 12px; }
         
-        /* Поиск */
+        /* Вкладки и поиск */
+        .tabs { display: flex; background: #fff; border-bottom: 1px solid #ccc; }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: none; cursor: pointer; font-weight: bold; color: #666; border-bottom: 2px solid transparent; }
+        .tab-btn.active { color: #007aff; border-bottom-color: #007aff; }
+        .tab-btn:hover { background: #f8f9fa; }
+
         #search-box { padding: 10px; background: #fff; border-bottom: 1px solid #ccc; }
         #search-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; outline: none; }
 
         /* Списки */
-        #contacts-list, #all-users-list { flex: 1; overflow-y: auto; }
+        #contacts-list, #all-users-list, #requests-list { flex: 1; overflow-y: auto; }
         .list-title { padding: 10px; font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold; background: #e9ecef; border-bottom: 1px solid #ccc; }
         
         .contact { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; font-weight: bold; color: #333; display: flex; flex-direction: column; }
@@ -37,9 +42,17 @@
         .contact.active { background: #dcf8c6; border-left: 4px solid #2ea44f; }
         .contact small { font-weight: normal; color: #888; font-size: 12px; }
 
+        /* Карточка заявки */
+        .request-card { padding: 10px 15px; border-bottom: 1px solid #eee; display: flex; flex-direction: column; gap: 5px; }
+        .request-card .req-info { font-weight: bold; font-size: 14px; }
+        .request-card .req-actions { display: flex; gap: 10px; margin-top: 5px; }
+        .req-actions button { padding: 5px 10px; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-accept { background: #28a745; color: white; }
+        .btn-decline { background: #dc3545; color: white; }
+        .btn-send-request { background: #007aff; color: white; padding: 5px 10px; border-radius: 3px; border: none; cursor: pointer; margin-top: 5px; font-size: 12px; }
+
         /* Правая панель (чат) */
         #chat-area { flex: 1; display: flex; flex-direction: column; background: #e5ddd5; overflow: hidden; }
-        
         #chat-header { background: #fff; padding: 15px; border-bottom: 1px solid #ccc; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         #delete-contact-chat-btn { background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 14px; display: none; }
         #delete-contact-chat-btn:hover { background: #cc0000; }
@@ -70,7 +83,6 @@
         #context-menu button:hover { background: #f0f0f0; }
         #context-menu button.danger { color: #dc3545; }
 
-        /* Кнопка смены ника */
         #change-nick-btn { background: #ffc107; border: none; padding: 5px; border-radius: 3px; cursor: pointer; font-size: 10px; margin-top: 5px; }
         
         @media (max-width: 600px) {
@@ -108,16 +120,31 @@
                 <button id="logout-btn" onclick="logout()">Выйти</button>
             </div>
 
-            <div id="search-box">
-                <input type="text" id="search-input" placeholder="Поиск по @юзернейму..." oninput="searchUsers()">
+            <!-- Вкладки -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('search')">Поиск людей</button>
+                <button class="tab-btn" onclick="switchTab('requests')">Заявки <span id="req-badge"></span></button>
+            </div>
+
+            <!-- Поиск -->
+            <div id="search-section">
+                <div id="search-box">
+                    <input type="text" id="search-input" placeholder="Поиск по @юзернейму..." oninput="searchUsers()">
+                </div>
+                <div id="all-users-list" style="display: none;">
+                    <div class="list-title" style="background:#d1ecf1; color:#0c5460;">Результаты поиска</div>
+                </div>
+            </div>
+
+            <!-- Заявки -->
+            <div id="requests-section" style="display: none; flex: 1; overflow-y: auto;">
+                <div class="list-title">Входящие заявки</div>
+                <div id="requests-list"></div>
             </div>
             
+            <!-- Мои контакты -->
             <div id="contacts-list">
                 <div class="list-title">Мои контакты</div>
-            </div>
-            
-            <div id="all-users-list" style="display: none;">
-                <div class="list-title" style="background:#d1ecf1; color:#0c5460;">Результаты поиска</div>
             </div>
         </div>
         
@@ -138,7 +165,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, set, get, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, set, get, remove, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         // ⚠️ ВСТАВЬТЕ СЮДА ВАШИ ДАННЫЕ ИЗ FIREBASE
@@ -152,17 +179,20 @@
   appId : "1:458746102805:web:b9504c82160fca249b7a1c" , 
   measurementId : "G-CEKD8FWHV7" 
 };
+
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const auth = getAuth(app);
         
         const emailDomain = "@mysite.com";
-        let currentUser = ""; // @username
-        let currentNick = ""; // Отображаемое имя
-        let currentChatPartner = ""; // @username собеседника
+        let currentUser = ""; 
+        let currentNick = ""; 
+        let currentChatPartner = ""; 
         let currentRoomId = "";
         let messagesListener = null;
-        let allUsersData = {}; // Храним всех юзеров для поиска
+        let allUsersData = {}; 
+        let myContacts = []; // Массив юзернеймов моих контактов
+        let mySentRequests = []; // Кому я отправил заявку
 
         let selectedMsgId = null;
         let selectedMsgText = "";
@@ -171,6 +201,7 @@
         const chatContainer = document.getElementById('messages');
         const contactsList = document.getElementById('contacts-list');
         const allUsersList = document.getElementById('all-users-list');
+        const requestsList = document.getElementById('requests-list');
         const chatTitle = document.getElementById('chat-title');
         const inputArea = document.getElementById('input-area');
         const errorDiv = document.getElementById('auth-error');
@@ -178,7 +209,7 @@
         const contextMenu = document.getElementById('context-menu');
         const searchInput = document.getElementById('search-input');
 
-        // 1. РЕГИСТРАЦИЯ
+        // --- РЕГИСТРАЦИЯ И ВХОД ---
         window.register = async function() {
             const user = document.getElementById('reg-username').value.trim().toLowerCase().replace('@', '');
             const nick = document.getElementById('reg-nickname').value.trim();
@@ -191,23 +222,17 @@
 
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, user + emailDomain, pass);
-                // Сохраняем юзернейм и ник в базу
-                await set(ref(db, 'users/' + user), { 
-                    username: user, 
-                    nickname: nick 
-                });
+                await set(ref(db, 'users/' + user), { username: user, nickname: nick });
                 alert("Успешная регистрация!");
             } catch (error) {
                 errorDiv.innerText = "Ошибка: " + (error.code === 'auth/email-already-in-use' ? "Этот юзернейм уже занят" : error.message);
             }
         };
 
-        // 2. ВХОД
         window.login = async function() {
             const user = document.getElementById('reg-username').value.trim().toLowerCase().replace('@', '');
             const pass = document.getElementById('reg-password').value;
             errorDiv.innerText = "";
-
             try {
                 await signInWithEmailAndPassword(auth, user + emailDomain, pass);
             } catch (error) {
@@ -215,22 +240,14 @@
             }
         };
 
-        // 3. ВЫХОД
         window.logout = function() { signOut(auth); };
 
-        // 4. АВТОРИЗАЦИЯ
+        // --- ИНИЦИАЛИЗАЦИЯ ПОСЛЕ ВХОДА ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user.email.replace(emailDomain, "");
-                
-                // Загружаем данные текущего пользователя (ник)
-                const userRef = ref(db, 'users/' + currentUser);
-                const snapshot = await get(userRef);
-                if (snapshot.exists()) {
-                    currentNick = snapshot.val().nickname || currentUser;
-                } else {
-                    currentNick = currentUser;
-                }
+                const snapshot = await get(ref(db, 'users/' + currentUser));
+                currentNick = snapshot.exists() ? snapshot.val().nickname : currentUser;
 
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('chat-screen').style.display = 'flex';
@@ -238,6 +255,7 @@
                 
                 loadAllUsers();
                 loadContacts();
+                listenToRequests(); // Слушаем новые заявки в реальном времени
             } else {
                 document.getElementById('auth-screen').style.display = 'flex';
                 document.getElementById('chat-screen').style.display = 'none';
@@ -247,10 +265,107 @@
             }
         });
 
-        // 5. ПОИСК ЛЮДЕЙ (ТОЛЬКО ПО ЮЗЕРНЕЙМУ)
+        // --- ВКЛАДКИ (ПОИСК / ЗАЯВКИ) ---
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (tab === 'search') {
+                document.getElementById('search-section').style.display = 'block';
+                document.getElementById('requests-section').style.display = 'none';
+            } else {
+                document.getElementById('search-section').style.display = 'none';
+                document.getElementById('requests-section').style.display = 'block';
+            }
+        };
+
+        // --- ЗАЯВКИ В ДРУЗЬЯ ---
+        function listenToRequests() {
+            const reqRef = ref(db, 'friendRequests/' + currentUser);
+            onValue(reqRef, (snapshot) => {
+                requestsList.innerHTML = "";
+                let count = 0;
+                if (snapshot.exists()) {
+                    const requests = snapshot.val();
+                    for (const fromUser in requests) {
+                        count++;
+                        const fromNick = requests[fromUser].nickname;
+                        
+                        const card = document.createElement('div');
+                        card.className = 'request-card';
+                        card.innerHTML = `
+                            <div class="req-info">${fromNick} <br><small>@${fromUser}</small></div>
+                            <div class="req-actions">
+                                <button class="btn-accept" onclick="acceptRequest('${fromUser}', '${fromNick}')">Принять</button>
+                                <button class="btn-decline" onclick="declineRequest('${fromUser}')">Отклонить</button>
+                            </div>
+                        `;
+                        requestsList.appendChild(card);
+                    }
+                }
+                
+                // Обновляем счетчик на вкладке
+                const badge = document.getElementById('req-badge');
+                badge.innerText = count > 0 ? `(${count})` : "";
+                badge.style.color = "#dc3545";
+            });
+        }
+
+        window.sendFriendRequest = function(partnerUsername) {
+            const partnerNick = allUsersData[partnerUsername].nickname;
+            // Отправляем заявку в ветку партнера
+            set(ref(db, `friendRequests/${partnerUsername}/${currentUser}`), {
+                nickname: currentNick
+            }).then(() => {
+                alert(`Заявка отправлена @${partnerUsername}`);
+            });
+        };
+
+        window.acceptRequest = function(fromUser, fromNick) {
+            // Добавляем друг друга в контакты
+            set(ref(db, `contacts/${currentUser}/${fromUser}`), fromNick);
+            set(ref(db, `contacts/${fromUser}/${currentUser}`), currentNick);
+            // Удаляем заявку
+            remove(ref(db, `friendRequests/${currentUser}/${fromUser}`)).then(() => {
+                loadContacts();
+            });
+        };
+
+        window.declineRequest = function(fromUser) {
+            remove(ref(db, `friendRequests/${currentUser}/${fromUser}`));
+        };
+
+        // --- ПОИСК И КОНТАКТЫ ---
+        function loadAllUsers() {
+            get(ref(db, 'users')).then((snapshot) => {
+                if (snapshot.exists()) allUsersData = snapshot.val();
+            });
+        }
+
+        function loadContacts() {
+            get(ref(db, 'contacts/' + currentUser)).then((snapshot) => {
+                contactsList.innerHTML = "<div class='list-title'>Мои контакты</div>";
+                myContacts = [];
+                if (snapshot.exists()) {
+                    const contacts = snapshot.val();
+                    for (const partner in contacts) {
+                        myContacts.push(partner);
+                        const partnerNick = contacts[partner];
+                        const div = document.createElement('div');
+                        div.className = 'contact';
+                        div.dataset.name = partner;
+                        div.innerHTML = `<span>${partnerNick}</span><small>@${partner}</small>`;
+                        div.onclick = () => openChat(partner, partnerNick, div);
+                        contactsList.appendChild(div);
+                    }
+                } else {
+                    contactsList.innerHTML += "<div style='padding:10px;color:#888'>Список пуст</div>";
+                }
+            });
+        }
+
         window.searchUsers = function() {
             const query = searchInput.value.toLowerCase().trim().replace('@', '');
-            
             if (query === "") {
                 allUsersList.style.display = 'none';
                 contactsList.style.display = 'block';
@@ -265,69 +380,40 @@
             for (const username in allUsersData) {
                 if (username === currentUser) continue;
 
-                // Ищем только по username
                 if (username.includes(query)) {
                     found = true;
                     const user = allUsersData[username];
                     const divAll = document.createElement('div');
                     divAll.className = 'contact';
-                    divAll.innerHTML = `<span>${user.nickname}</span><small>@${user.username}</small>`;
-                    divAll.onclick = () => {
-                        addToContacts(user.username);
-                        openChat(user.username, user.nickname);
-                        searchInput.value = ""; 
-                        searchUsers(); 
-                    };
+                    
+                    // Проверяем, в контактах ли он уже
+                    const isContact = myContacts.includes(username);
+                    let btnHtml = "";
+                    
+                    if (isContact) {
+                        btnHtml = `<small style="color:#28a745; margin-top:5px;">В контактах</small>`;
+                    } else {
+                        btnHtml = `<button class="btn-send-request" onclick="event.stopPropagation(); sendFriendRequest('${username}')">Добавить в друзья</button>`;
+                    }
+
+                    divAll.innerHTML = `<span>${user.nickname}</span><small>@${user.username}</small>${btnHtml}`;
+                    
+                    // Если уже в контактах, при клике открываем чат
+                    if (isContact) {
+                        divAll.onclick = () => {
+                            openChat(user.username, user.nickname);
+                            searchInput.value = ""; 
+                            searchUsers(); 
+                        };
+                    }
+                    
                     allUsersList.appendChild(divAll);
                 }
             }
-
-            if (!found) {
-                allUsersList.innerHTML += "<div style='padding:10px;color:#888'>Никого не найдено</div>";
-            }
+            if (!found) allUsersList.innerHTML += "<div style='padding:10px;color:#888'>Никого не найдено</div>";
         };
 
-        // 6. ЗАГРУЗКА ВСЕХ ПОЛЬЗОВАТЕЛЕЙ
-        function loadAllUsers() {
-            const usersRef = ref(db, 'users');
-            get(usersRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    allUsersData = snapshot.val();
-                }
-            });
-        }
-
-        // 7. ЗАГРУЗКА КОНТАКТОВ ИЗ БАЗЫ
-        function loadContacts() {
-            const contactsRef = ref(db, 'contacts/' + currentUser);
-            get(contactsRef).then((snapshot) => {
-                contactsList.innerHTML = "<div class='list-title'>Мои контакты</div>";
-                if (snapshot.exists()) {
-                    const contacts = snapshot.val();
-                    for (const partnerUsername in contacts) {
-                        const partnerNick = contacts[partnerUsername];
-                        const div = document.createElement('div');
-                        div.className = 'contact';
-                        div.dataset.name = partnerUsername;
-                        div.innerHTML = `<span>${partnerNick}</span><small>@${partnerUsername}</small>`;
-                        div.onclick = () => openChat(partnerUsername, partnerNick, div);
-                        contactsList.appendChild(div);
-                    }
-                } else {
-                    contactsList.innerHTML += "<div style='padding:10px;color:#888'>Список пуст</div>";
-                }
-            });
-        }
-
-        // 8. ДОБАВЛЕНИЕ В КОНТАКТЫ
-        function addToContacts(partnerUsername) {
-            const partnerNick = allUsersData[partnerUsername] ? allUsersData[partnerUsername].nickname : partnerUsername;
-            set(ref(db, `contacts/${currentUser}/${partnerUsername}`), partnerNick).then(() => {
-                loadContacts();
-            });
-        }
-
-        // 9. ОТКРЫТИЕ ЧАТА
+        // --- ЧАТ ---
         function openChat(partnerUsername, partnerNick, element) {
             document.querySelectorAll('.contact').forEach(c => c.classList.remove('active'));
             if (element) element.classList.add('active');
@@ -347,14 +433,11 @@
             messagesListener = onChildAdded(chatRef, (data) => {
                 const msg = data.val();
                 const msgId = data.key;
-                
                 const msgDiv = document.createElement('div');
                 msgDiv.className = 'message ' + (msg.sender === currentUser ? 'my-msg' : 'other-msg');
                 msgDiv.dataset.id = msgId;
                 msgDiv.dataset.text = msg.text || "";
-                
-                const senderNick = msg.senderNick || msg.sender;
-                msgDiv.innerHTML = `<b style="font-size:12px;color:#666;display:block;">${senderNick}</b> <span class="msg-content">${msg.text}</span>`;
+                msgDiv.innerHTML = `<b style="font-size:12px;color:#666;display:block;">${msg.senderNick}</b> <span class="msg-content">${msg.text}</span>`;
 
                 if (msg.sender === currentUser) {
                     msgDiv.addEventListener('contextmenu', (e) => {
@@ -362,17 +445,18 @@
                         showContextMenu(e, msgId, msg.text, msgDiv);
                     });
                 }
-
                 chatContainer.appendChild(msgDiv);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             });
         }
 
-        // 10. УДАЛЕНИЕ КОНТАКТА
         window.deleteCurrentContact = function() {
             if (!currentChatPartner) return;
             if (confirm(`Удалить @${currentChatPartner} из контактов?`)) {
                 remove(ref(db, `contacts/${currentUser}/${currentChatPartner}`)).then(() => {
+                    // Также удаляем себя из контактов у собеседника (опционально)
+                    remove(ref(db, `contacts/${currentChatPartner}/${currentUser}`));
+                    
                     chatContainer.innerHTML = "";
                     chatTitle.innerText = "Выберите контакт...";
                     inputArea.style.display = 'none';
@@ -384,11 +468,9 @@
             }
         };
 
-        // 11. ОТПРАВКА СООБЩЕНИЯ
         window.sendMessage = function() {
             const text = document.getElementById('message-input').value.trim();
             if (text === "" || currentRoomId === "") return;
-
             push(ref(db, 'chats/' + currentRoomId), {
                 sender: currentUser,
                 senderNick: currentNick,
@@ -396,10 +478,9 @@
                 timestamp: Date.now()
             }).then(() => {
                 document.getElementById('message-input').value = "";
-            }).catch(err => alert("Ошибка: " + err.message));
+            });
         };
 
-        // 12. СМЕНА НИКА
         window.changeNickname = async function() {
             const newNick = prompt("Введите новый ник:", currentNick);
             if (newNick && newNick.trim() !== "") {
@@ -410,33 +491,25 @@
             }
         };
 
-        // 13. КОНТЕКСТНОЕ МЕНЮ
+        // Контекстное меню
         function showContextMenu(e, msgId, msgText, msgDiv) {
-            selectedMsgId = msgId;
-            selectedMsgText = msgText;
-            selectedMsgDiv = msgDiv;
+            selectedMsgId = msgId; selectedMsgText = msgText; selectedMsgDiv = msgDiv;
             contextMenu.style.display = 'block';
             contextMenu.style.left = e.pageX + 'px';
             contextMenu.style.top = e.pageY + 'px';
         }
-
         document.addEventListener('click', (e) => {
-            if (!contextMenu.contains(e.target)) {
-                contextMenu.style.display = 'none';
-            }
+            if (!contextMenu.contains(e.target)) contextMenu.style.display = 'none';
         });
-
         window.editMessage = function() {
             contextMenu.style.display = 'none';
             if (!selectedMsgId) return;
             const newText = prompt("Изменить сообщение:", selectedMsgText);
             if (newText !== null && newText.trim() !== "" && newText !== selectedMsgText) {
                 update(ref(db, 'chats/' + currentRoomId + '/' + selectedMsgId), { text: newText.trim() });
-                const contentSpan = selectedMsgDiv.querySelector('.msg-content');
-                if (contentSpan) contentSpan.innerText = newText.trim();
+                selectedMsgDiv.querySelector('.msg-content').innerText = newText.trim();
             }
         };
-
         window.deleteMessage = function() {
             contextMenu.style.display = 'none';
             if (!selectedMsgId) return;

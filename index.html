@@ -21,9 +21,13 @@
         /* Левая панель */
         #sidebar { width: 300px; background: #f8f9fa; border-right: 1px solid #ccc; display: flex; flex-direction: column; }
         #sidebar h3 { margin: 0; padding: 15px; background: #007aff; color: white; text-align: center; font-size: 16px; }
-        #my-name-display { padding: 10px; font-size: 14px; border-bottom: 1px solid #ccc; background: #e2e6ea; display: flex; justify-content: space-between; align-items: center; }
-        #logout-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 12px; }
         
+        #my-profile { padding: 10px; font-size: 14px; border-bottom: 1px solid #ccc; background: #e2e6ea; display: flex; align-items: center; gap: 10px; }
+        #my-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; background: #ccc; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 18px; }
+        #my-avatar:hover { opacity: 0.8; }
+        #my-info { flex: 1; display: flex; flex-direction: column; }
+        #logout-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 12px; align-self: flex-start; }
+
         /* Вкладки и поиск */
         .tabs { display: flex; background: #fff; border-bottom: 1px solid #ccc; }
         .tab-btn { flex: 1; padding: 10px; border: none; background: none; cursor: pointer; font-weight: bold; color: #666; border-bottom: 2px solid transparent; }
@@ -37,17 +41,21 @@
         #contacts-list, #all-users-list, #requests-list { flex: 1; overflow-y: auto; }
         .list-title { padding: 10px; font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold; background: #e9ecef; border-bottom: 1px solid #ccc; }
         
-        .contact { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; font-weight: bold; color: #333; display: flex; justify-content: space-between; align-items: center; }
+        .contact { padding: 10px 15px; border-bottom: 1px solid #eee; cursor: pointer; font-weight: bold; color: #333; display: flex; align-items: center; gap: 10px; }
         .contact:hover { background: #e2e6ea; }
         .contact.active { background: #dcf8c6; border-left: 4px solid #2ea44f; }
-        .contact-info { display: flex; flex-direction: column; }
+        
+        .contact-info { display: flex; flex-direction: column; flex: 1; }
         .contact-info small { font-weight: normal; color: #888; font-size: 12px; margin-top: 3px; }
+        
+        /* Аватарки в списках */
+        .avatar-small { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; background: #007aff; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         
         .unread-badge { background: #dc3545; color: white; border-radius: 50%; padding: 2px 8px; font-size: 12px; font-weight: bold; display: none; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
         /* Карточка заявки */
-        .request-card { padding: 10px 15px; border-bottom: 1px solid #eee; display: flex; flex-direction: column; gap: 5px; }
-        .request-card .req-info { font-weight: bold; font-size: 14px; }
+        .request-card { padding: 10px 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; }
+        .request-card .req-info { font-weight: bold; font-size: 14px; flex: 1; display: flex; flex-direction: column; }
         .request-card .req-actions { display: flex; gap: 10px; margin-top: 5px; }
         .req-actions button { padding: 5px 10px; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: bold; }
         .btn-accept { background: #28a745; color: white; }
@@ -59,17 +67,23 @@
 
         /* Правая панель (чат) */
         #chat-area { flex: 1; display: flex; flex-direction: column; background: #e5ddd5; overflow: hidden; }
-        #chat-header { background: #fff; padding: 15px; border-bottom: 1px solid #ccc; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        #chat-header { background: #fff; padding: 10px 15px; border-bottom: 1px solid #ccc; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        #chat-header-info { display: flex; align-items: center; gap: 10px; }
         #delete-contact-chat-btn { background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 14px; display: none; }
         #delete-contact-chat-btn:hover { background: #cc0000; }
 
         #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; overflow-x: hidden; }
         
-        /* Контейнер сообщения для времени */
-        .message-container { display: flex; flex-direction: column; margin-bottom: 15px; max-width: 75%; position: relative; }
-        .message-container.my-msg-container { align-self: flex-end; }
+        /* Контейнер сообщения */
+        .message-container { display: flex; margin-bottom: 15px; max-width: 85%; position: relative; gap: 8px; }
+        .message-container.my-msg-container { align-self: flex-end; flex-direction: row-reverse; }
         .message-container.other-msg-container { align-self: flex-start; }
 
+        /* Аватарка у сообщения */
+        .msg-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; background: #007aff; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; flex-shrink: 0; }
+
+        .msg-content-wrapper { display: flex; flex-direction: column; }
+        
         /* Время сообщения */
         .msg-time { font-size: 10px; color: #888; margin-top: 3px; text-align: right; }
         .message-container.other-msg-container .msg-time { text-align: left; }
@@ -120,13 +134,13 @@
         #context-menu button:hover { background: #f0f0f0; }
         #context-menu button.danger { color: #dc3545; }
 
-        #change-nick-btn { background: #ffc107; border: none; padding: 5px; border-radius: 3px; cursor: pointer; font-size: 10px; margin-top: 5px; }
+        #change-nick-btn { background: #ffc107; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; margin-top: 3px; }
         
         @media (max-width: 600px) {
             #chat-screen { flex-direction: column; }
             #sidebar { width: 100%; height: 45vh; flex: none; }
             #chat-area { height: 55vh; }
-            .message-container { max-width: 85%; }
+            .message-container { max-width: 90%; }
         }
     </style>
 </head>
@@ -156,9 +170,14 @@
     <div id="chat-screen">
         <div id="sidebar">
             <h3>Моя Соцсеть</h3>
-            <div id="my-name-display">
-                <div>
-                    <span id="my-username"></span><br>
+            
+            <!-- Мой профиль с аватаркой -->
+            <div id="my-profile">
+                <input type="file" id="avatar-input" accept="image/*" onchange="uploadAvatar()" style="display:none;">
+                <div id="my-avatar" onclick="document.getElementById('avatar-input').click()" title="Нажмите, чтобы сменить аватарку">?</div>
+                
+                <div id="my-info">
+                    <span id="my-username"></span>
                     <button id="change-nick-btn" onclick="changeNickname()">Сменить ник</button>
                 </div>
                 <button id="logout-btn" onclick="logout()">Выйти</button>
@@ -189,8 +208,12 @@
         </div>
         
         <div id="chat-area">
+            <!-- Шапка чата с аватаркой собеседника -->
             <div id="chat-header">
-                <span id="chat-title">Выберите контакт...</span>
+                <div id="chat-header-info">
+                    <div id="chat-partner-avatar" class="avatar-small"></div>
+                    <span id="chat-title">Выберите контакт...</span>
+                </div>
                 <button id="delete-contact-chat-btn" onclick="deleteCurrentContact()">Удалить контакт ✖</button>
             </div>
             
@@ -229,6 +252,7 @@
         const emailDomain = "@mysite.com";
         let currentUser = ""; 
         let currentNick = ""; 
+        let currentAvatar = ""; 
         let currentChatPartner = ""; 
         let currentRoomId = "";
         let messagesListener = null;
@@ -247,11 +271,22 @@
         const allUsersList = document.getElementById('all-users-list');
         const requestsList = document.getElementById('requests-list');
         const chatTitle = document.getElementById('chat-title');
+        const chatPartnerAvatar = document.getElementById('chat-partner-avatar');
         const inputArea = document.getElementById('input-area');
         const errorDiv = document.getElementById('auth-error');
         const delContactChatBtn = document.getElementById('delete-contact-chat-btn');
         const contextMenu = document.getElementById('context-menu');
         const searchInput = document.getElementById('search-input');
+
+        // Функция для генерации заглушки аватарки (первая буква)
+        function getAvatarHtml(name, avatarUrl, sizeClass) {
+            if (avatarUrl) {
+                return `<img src="${avatarUrl}" class="${sizeClass}" style="object-fit:cover;">`;
+            } else {
+                const firstLetter = name ? name.charAt(0).toUpperCase() : '?';
+                return `<div class="${sizeClass}">${firstLetter}</div>`;
+            }
+        }
 
         function requestNotificationPermission() {
             if ("Notification" in window) {
@@ -306,7 +341,7 @@
 
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, user + emailDomain, pass);
-                await set(ref(db, 'users/' + user), { username: user, nickname: nick });
+                await set(ref(db, 'users/' + user), { username: user, nickname: nick, avatar: "" });
                 alert("Успешная регистрация!");
             } catch (error) {
                 errorDiv.innerText = "Ошибка: " + (error.code === 'auth/email-already-in-use' ? "Этот юзернейм уже занят" : error.message);
@@ -331,12 +366,27 @@
             if (user) {
                 currentUser = user.email.replace(emailDomain, "");
                 const snapshot = await get(ref(db, 'users/' + currentUser));
-                currentNick = snapshot.exists() ? snapshot.val().nickname : currentUser;
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    currentNick = data.nickname || currentUser;
+                    currentAvatar = data.avatar || "";
+                } else {
+                    currentNick = currentUser;
+                    currentAvatar = "";
+                }
 
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('chat-screen').style.display = 'flex';
-                document.getElementById('my-username').innerText = `@${currentUser} (${currentNick})`;
+                document.getElementById('my-username').innerText = `@${currentUser}`;
                 
+                // Установка аватарки в профиле
+                const myAvatarDiv = document.getElementById('my-avatar');
+                if (currentAvatar) {
+                    myAvatarDiv.innerHTML = `<img src="${currentAvatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                } else {
+                    myAvatarDiv.innerText = currentNick.charAt(0).toUpperCase();
+                }
+
                 requestNotificationPermission();
                 
                 loadAllUsers();
@@ -351,6 +401,49 @@
                 document.title = "Моя Соцсеть";
             }
         });
+
+        // --- ЗАГРУЗКА АВАТАРКИ ---
+        window.uploadAvatar = function() {
+            const fileInput = document.getElementById('avatar-input');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            if (file.size > 2 * 1024 * 1024) {
+                alert("Аватарка слишком большая! Максимум 2 МБ.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("image", file);
+
+            document.getElementById('my-avatar').innerText = "...";
+
+            fetch("https://api.imgbb.com/1/upload?key=97d22a881b5b093391e15aea3c79dfde", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    const imageUrl = result.data.url;
+                    currentAvatar = imageUrl;
+                    
+                    // Сохраняем ссылку в Firebase
+                    update(ref(db, 'users/' + currentUser), { avatar: currentAvatar });
+                    
+                    // Обновляем в интерфейсе
+                    document.getElementById('my-avatar').innerHTML = `<img src="${currentAvatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                    loadContacts();
+                } else {
+                    alert("Ошибка ImgBB: " + (result.error ? result.error.message : "Неизвестная ошибка"));
+                    document.getElementById('my-avatar').innerText = currentNick.charAt(0).toUpperCase();
+                }
+            })
+            .catch(error => {
+                alert("Ошибка сети: " + error.message);
+                document.getElementById('my-avatar').innerText = currentNick.charAt(0).toUpperCase();
+            });
+        };
 
         window.switchTab = function(tab) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -374,14 +467,18 @@
                     const requests = snapshot.val();
                     for (const fromUser in requests) {
                         count++;
-                        const fromNick = requests[fromUser].nickname;
+                        const reqData = requests[fromUser];
                         
                         const card = document.createElement('div');
                         card.className = 'request-card';
+                        
+                        const avatarHtml = getAvatarHtml(reqData.nickname, reqData.avatar, 'avatar-small');
+                        
                         card.innerHTML = `
-                            <div class="req-info">${fromNick} <br><small>@${fromUser}</small></div>
+                            ${avatarHtml}
+                            <div class="req-info">${reqData.nickname} <br><small>@${fromUser}</small></div>
                             <div class="req-actions">
-                                <button class="btn-accept" onclick="acceptRequest('${fromUser}', '${fromNick}')">Принять</button>
+                                <button class="btn-accept" onclick="acceptRequest('${fromUser}')">Принять</button>
                                 <button class="btn-decline" onclick="declineRequest('${fromUser}')">Отклонить</button>
                             </div>
                         `;
@@ -397,18 +494,23 @@
         window.sendFriendRequest = function(partnerUsername) {
             const partnerNick = allUsersData[partnerUsername].nickname;
             set(ref(db, `friendRequests/${partnerUsername}/${currentUser}`), {
-                nickname: currentNick
+                nickname: currentNick,
+                avatar: currentAvatar
             }).then(() => {
                 alert(`Заявка отправлена @${partnerUsername}`);
             });
         };
 
-        window.acceptRequest = function(fromUser, fromNick) {
+        window.acceptRequest = function(fromUser) {
+            const fromData = allUsersData[fromUser];
+            const fromNick = fromData ? fromData.nickname : fromUser;
+            const fromAvatar = fromData ? fromData.avatar : "";
+
             set(ref(db, `contacts/${currentUser}/${fromUser}`), fromNick);
             set(ref(db, `contacts/${fromUser}/${currentUser}`), currentNick);
             remove(ref(db, `friendRequests/${currentUser}/${fromUser}`)).then(() => {
                 loadContacts();
-                openChat(fromUser, fromNick);
+                openChat(fromUser, fromNick, fromAvatar);
                 alert(`Вы приняли заявку от ${fromNick}. Чат открыт!`);
             });
         };
@@ -432,20 +534,25 @@
                     for (const partner in contacts) {
                         myContacts.push(partner);
                         const partnerNick = contacts[partner];
+                        const partnerData = allUsersData[partner];
+                        const partnerAvatar = partnerData ? partnerData.avatar : "";
                         
                         const div = document.createElement('div');
                         div.className = 'contact';
                         div.dataset.name = partner;
                         div.id = 'contact_' + partner;
                         
+                        const avatarHtml = getAvatarHtml(partnerNick, partnerAvatar, 'avatar-small');
+                        
                         div.innerHTML = `
+                            ${avatarHtml}
                             <div class="contact-info">
                                 <span>${partnerNick}</span>
                                 <small>@${partner}</small>
                             </div>
                             <span class="unread-badge" id="badge_${partner}">0</span>
                         `;
-                        div.onclick = () => openChat(partner, partnerNick, div);
+                        div.onclick = () => openChat(partner, partnerNick, partnerAvatar, div);
                         contactsList.appendChild(div);
 
                         listenToUnreadMessages(partner);
@@ -542,7 +649,10 @@
 
                 if (username.includes(query)) {
                     found = true;
-                    const userNick = allUsersData[username].nickname;
+                    const userData = allUsersData[username];
+                    const userNick = userData.nickname;
+                    const userAvatar = userData.avatar;
+                    
                     const divAll = document.createElement('div');
                     divAll.className = 'contact';
                     
@@ -550,24 +660,37 @@
                     let btnHtml = "";
                     
                     if (isContact) {
-                        btnHtml = `<button class="btn-chat" onclick="event.stopPropagation(); openChat('${username}', '${userNick}')">Написать</button>`;
+                        btnHtml = `<button class="btn-chat" onclick="event.stopPropagation(); openChat('${username}', '${userNick}', '${userAvatar}')">Написать</button>`;
                     } else {
                         btnHtml = `<button class="btn-send-request" onclick="event.stopPropagation(); sendFriendRequest('${username}')">Добавить в друзья</button>`;
                     }
 
-                    divAll.innerHTML = `<div class="contact-info"><span>${userNick}</span><small>@${username}</small></div>${btnHtml}`;
+                    const avatarHtml = getAvatarHtml(userNick, userAvatar, 'avatar-small');
+                    
+                                       divAll.innerHTML = `
+                        ${avatarHtml}
+                        <div class="contact-info">
+                            <span>${userNick}</span>
+                            <small>@${username}</small>
+                        </div>
+                        ${btnHtml}
+                    `;
                     allUsersList.appendChild(divAll);
                 }
             }
             if (!found) allUsersList.innerHTML += "<div style='padding:10px;color:#888'>Никого не найдено</div>";
         };
 
-        function openChat(partnerUsername, partnerNick, element) {
+        function openChat(partnerUsername, partnerNick, partnerAvatar, element) {
             document.querySelectorAll('.contact').forEach(c => c.classList.remove('active'));
             if (element) element.classList.add('active');
             
             currentChatPartner = partnerUsername;
             chatTitle.innerText = `Чат с ${partnerNick} (@${partnerUsername})`;
+            
+            // Установка аватарки в шапку чата
+            chatPartnerAvatar.innerHTML = getAvatarHtml(partnerNick, partnerAvatar, 'avatar-small');
+            
             delContactChatBtn.style.display = 'block';
             inputArea.style.display = 'flex';
             chatContainer.innerHTML = "";
@@ -599,9 +722,21 @@
                     lastMessageDate = msgDate;
                 }
 
+                // Определяем аватарку отправителя
+                let senderAvatar = "";
+                if (msg.sender === currentUser) {
+                    senderAvatar = currentAvatar;
+                } else {
+                    senderAvatar = partnerAvatar;
+                }
+
                 const msgContainer = document.createElement('div');
                 msgContainer.className = 'message-container ' + (msg.sender === currentUser ? 'my-msg-container' : 'other-msg-container');
                 
+                // Обертка для сообщения и времени
+                const contentWrapper = document.createElement('div');
+                contentWrapper.className = 'msg-content-wrapper';
+
                 const msgDiv = document.createElement('div');
                 msgDiv.className = 'message ' + (msg.sender === currentUser ? 'my-msg' : 'other-msg');
                 msgDiv.dataset.id = msgId;
@@ -636,8 +771,21 @@
                     }
                 }
 
-                msgContainer.appendChild(msgDiv);
-                msgContainer.appendChild(timeDiv);
+                // Добавляем аватарку к сообщению
+                const msgAvatarHtml = getAvatarHtml(msg.senderNick, senderAvatar, 'msg-avatar');
+
+                contentWrapper.appendChild(msgDiv);
+                contentWrapper.appendChild(timeDiv);
+                
+                // Если сообщение мое - аватарка справа, если чужое - слева
+                if (msg.sender === currentUser) {
+                    msgContainer.innerHTML = msgAvatarHtml;
+                    msgContainer.appendChild(contentWrapper);
+                } else {
+                    msgContainer.innerHTML = msgAvatarHtml;
+                    msgContainer.appendChild(contentWrapper);
+                }
+
                 chatContainer.appendChild(msgContainer);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             });
@@ -650,6 +798,7 @@
                     remove(ref(db, `contacts/${currentChatPartner}/${currentUser}`));
                     chatContainer.innerHTML = "";
                     chatTitle.innerText = "Выберите контакт...";
+                    chatPartnerAvatar.innerHTML = "";
                     inputArea.style.display = 'none';
                     delContactChatBtn.style.display = 'none';
                     currentRoomId = "";
@@ -696,7 +845,7 @@
             .then(result => {
                 if (result.success) {
                     const imageUrl = result.data.url;
-                                        push(ref(db, 'chats/' + currentRoomId), {
+                    push(ref(db, 'chats/' + currentRoomId), {
                         sender: currentUser,
                         senderNick: currentNick,
                         text: imageUrl,
@@ -721,7 +870,13 @@
             if (newNick && newNick.trim() !== "") {
                 await update(ref(db, 'users/' + currentUser), { nickname: newNick.trim() });
                 currentNick = newNick.trim();
-                document.getElementById('my-username').innerText = `@${currentUser} (${currentNick})`;
+                document.getElementById('my-username').innerText = `@${currentUser}`;
+                
+                // Обновляем аватарку (первую букву), если нет картинки
+                if (!currentAvatar) {
+                    document.getElementById('my-avatar').innerText = currentNick.charAt(0).toUpperCase();
+                }
+                
                 alert("Ник изменен!");
             }
         };

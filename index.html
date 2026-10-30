@@ -581,13 +581,25 @@
         document.addEventListener('click', (e) => {
             if (!contextMenu.contains(e.target)) contextMenu.style.display = 'none';
         });
-        window.editMessage = function() {
+                window.editMessage = function() {
             contextMenu.style.display = 'none';
             if (!selectedMsgId) return;
-            const newText = prompt("Изменить сообщение:", selectedMsgText);
-            if (newText !== null && newText.trim() !== "" && newText !== selectedMsgText) {
+            
+            // Берем актуальный текст прямо из элемента на экране, а не из старой переменной
+            const currentContentSpan = selectedMsgDiv.querySelector('.msg-content');
+            const actualText = currentContentSpan ? currentContentSpan.innerText : selectedMsgText;
+
+            const newText = prompt("Изменить сообщение:", actualText);
+            
+            if (newText !== null && newText.trim() !== "" && newText !== actualText) {
                 update(ref(db, 'chats/' + currentRoomId + '/' + selectedMsgId), { text: newText.trim() });
-                selectedMsgDiv.querySelector('.msg-content').innerText = newText.trim();
+                
+                // Обновляем на экране
+                if (currentContentSpan) currentContentSpan.innerText = newText.trim();
+                
+                // Обновляем скрытые переменные для следующего редактирования
+                selectedMsgText = newText.trim(); 
+                selectedMsgDiv.dataset.text = newText.trim();
             }
         };
         window.deleteMessage = function() {

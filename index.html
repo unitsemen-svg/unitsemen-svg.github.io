@@ -1,4 +1,4 @@
-    `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -8,23 +8,19 @@
         * { box-sizing: border-box; }
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #e5e5ea; height: 100vh; display: flex; flex-direction: column; }
         
-        /* Экран входа */
         #auth-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: white; padding: 20px; }
         #auth-screen input { width: 100%; max-width: 300px; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
         #auth-screen button { width: 100%; max-width: 300px; padding: 12px; background: #007aff; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
         #auth-screen button.secondary { background: #6c757d; }
         #auth-error { color: red; font-size: 14px; margin-bottom: 10px; text-align: center; }
 
-        /* Основной интерфейс */
         #chat-screen { display: none; height: 100vh; flex-direction: row; }
         
-        /* Левая панель */
         #sidebar { width: 300px; background: #f8f9fa; border-right: 1px solid #ccc; display: flex; flex-direction: column; }
         #sidebar h3 { margin: 0; padding: 15px; background: #007aff; color: white; text-align: center; font-size: 16px; }
         #my-name-display { padding: 10px; font-size: 14px; border-bottom: 1px solid #ccc; background: #e2e6ea; display: flex; justify-content: space-between; align-items: center; }
         #logout-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 12px; }
         
-        /* Вкладки и поиск */
         .tabs { display: flex; background: #fff; border-bottom: 1px solid #ccc; }
         .tab-btn { flex: 1; padding: 10px; border: none; background: none; cursor: pointer; font-weight: bold; color: #666; border-bottom: 2px solid transparent; }
         .tab-btn.active { color: #007aff; border-bottom-color: #007aff; }
@@ -33,24 +29,17 @@
         #search-box { padding: 10px; background: #fff; border-bottom: 1px solid #ccc; }
         #search-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; outline: none; }
 
-        /* Списки */
         #contacts-list, #all-users-list, #requests-list { flex: 1; overflow-y: auto; }
         .list-title { padding: 10px; font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold; background: #e9ecef; border-bottom: 1px solid #ccc; }
         
-        /* Карточка контакта */
         .contact { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; font-weight: bold; color: #333; display: flex; justify-content: space-between; align-items: center; }
         .contact:hover { background: #e2e6ea; }
         .contact.active { background: #dcf8c6; border-left: 4px solid #2ea44f; }
         .contact-info { display: flex; flex-direction: column; }
         .contact-info small { font-weight: normal; color: #888; font-size: 12px; margin-top: 3px; }
         
-        /* Красный кружок уведомления */
-        .unread-badge { 
-            background: #dc3545; color: white; border-radius: 50%; padding: 2px 8px; 
-            font-size: 12px; font-weight: bold; display: none; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        }
+        .unread-badge { background: #dc3545; color: white; border-radius: 50%; padding: 2px 8px; font-size: 12px; font-weight: bold; display: none; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
-        /* Карточка заявки */
         .request-card { padding: 10px 15px; border-bottom: 1px solid #eee; display: flex; flex-direction: column; gap: 5px; }
         .request-card .req-info { font-weight: bold; font-size: 14px; }
         .request-card .req-actions { display: flex; gap: 10px; margin-top: 5px; }
@@ -58,11 +47,9 @@
         .btn-accept { background: #28a745; color: white; }
         .btn-decline { background: #dc3545; color: white; }
         
-        /* Кнопки в поиске */
         .btn-send-request { background: #007aff; color: white; padding: 5px 10px; border-radius: 3px; border: none; cursor: pointer; margin-top: 5px; font-size: 12px; }
         .btn-chat { background: #28a745; color: white; padding: 5px 10px; border-radius: 3px; border: none; cursor: pointer; margin-top: 5px; font-size: 12px; }
 
-        /* Правая панель (чат) */
         #chat-area { flex: 1; display: flex; flex-direction: column; background: #e5ddd5; overflow: hidden; }
         #chat-header { background: #fff; padding: 15px; border-bottom: 1px solid #ccc; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         #delete-contact-chat-btn { background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 14px; display: none; }
@@ -70,19 +57,21 @@
 
         #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; overflow-x: hidden; }
         
-        .message { 
-            margin-bottom: 15px; padding: 10px 15px; border-radius: 15px; max-width: 75%; font-size: 15px; 
-            word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: pre-wrap; 
-            position: relative; cursor: context-menu; 
-        }
+        .message { margin-bottom: 15px; padding: 10px 15px; border-radius: 15px; max-width: 75%; font-size: 15px; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: pre-wrap; position: relative; cursor: context-menu; }
         .my-msg { background: #dcf8c6; align-self: flex-end; border-bottom-right-radius: 2px; }
         .other-msg { background: #fff; align-self: flex-start; border-bottom-left-radius: 2px; }
         
+        .msg-image { max-width: 100%; border-radius: 10px; margin-top: 5px; cursor: pointer; display: block; }
+
         #input-area { display: flex; padding: 10px; background: #f0f0f0; gap: 10px; align-items: center; }
         #input-area input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
         #input-area button { padding: 12px 20px; background: #007aff; color: white; border: none; border-radius: 20px; cursor: pointer; }
+        
+        /* Кнопка файла */
+        .file-label { background: #ccc; color: #333; padding: 10px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+        .file-label:hover { background: #bbb; }
+        #file-input { display: none; }
 
-        /* Меню */
         #context-menu {
             display: none; position: absolute; background: white; border: 1px solid #ccc;
             border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 1000; overflow: hidden;
@@ -163,7 +152,10 @@
             
             <div id="messages"></div>
             
+            <!-- Поле ввода с кнопкой файла -->
             <div id="input-area" style="display: none;">
+                <input type="file" id="file-input" onchange="uploadFile()">
+                <label for="file-input" class="file-label">📎</label>
                 <input type="text" id="message-input" placeholder="Сообщение...">
                 <button onclick="sendMessage()">➤</button>
             </div>
@@ -175,17 +167,16 @@
         import { getDatabase, ref, push, onChildAdded, set, get, remove, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // ⚠️ ВСТАВЬТЕ СЮДА ВАШИ ДАННЫЕ ИЗ FIREBASE
         const firebaseConfig = { 
-  apiKey : "AIzaSyAkBvVaf0_KNZ4sVDfMtuziGCGBQwUq55E" , 
-  authDomain : "find-dude.firebaseapp.com" , 
-  databaseURL : "https://find-dude-default-rtdb.firebaseio.com" , 
-  projectId : "find-dude" , 
-  storageBucket : "find-dude.firebasestorage.app" , 
-  messagingSenderId : "458746102805" , 
-  appId : "1:458746102805:web:b9504c82160fca249b7a1c" , 
-  measurementId : "G-CEKD8FWHV7" 
-};
+            apiKey : "AIzaSyAkBvVaf0_KNZ4sVDfMtuziGCGBQwUq55E" , 
+            authDomain : "find-dude.firebaseapp.com" , 
+            databaseURL : "https://find-dude-default-rtdb.firebaseio.com" , 
+            projectId : "find-dude" , 
+            storageBucket : "find-dude.firebasestorage.app" , 
+            messagingSenderId : "458746102805" , 
+            appId : "1:458746102805:web:b9504c82160fca249b7a1c" , 
+            measurementId : "G-CEKD8FWHV7" 
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
@@ -199,8 +190,8 @@
         let messagesListener = null;
         let allUsersData = {}; 
         let myContacts = []; 
-        let unreadListeners = {}; // Слушатели непрочитанных сообщений
-        let lastReadTimes = {}; // Время последнего прочтения
+        let unreadListeners = {}; 
+        let lastReadTimes = {}; 
 
         let selectedMsgId = null;
         let selectedMsgText = "";
@@ -268,7 +259,7 @@
                 document.getElementById('reg-username').value = "";
                 document.getElementById('reg-nickname').value = "";
                 document.getElementById('reg-password').value = "";
-                document.title = "Моя Соцсеть"; // Сбрасываем заголовок
+                document.title = "Моя Соцсеть";
             }
         });
 
@@ -358,7 +349,6 @@
                         div.dataset.name = partner;
                         div.id = 'contact_' + partner;
                         
-                        // Добавляем красный кружок (скрыт по умолчанию)
                         div.innerHTML = `
                             <div class="contact-info">
                                 <span>${partnerNick}</span>
@@ -369,7 +359,6 @@
                         div.onclick = () => openChat(partner, partnerNick, div);
                         contactsList.appendChild(div);
 
-                        // Запускаем слушатель непрочитанных сообщений для этого контакта
                         listenToUnreadMessages(partner);
                     }
                 } else {
@@ -378,27 +367,23 @@
             });
         }
 
-        // --- СИСТЕМА НЕПРОЧИТАННЫХ СООБЩЕНИЙ ---
         function listenToUnreadMessages(partner) {
-            if (unreadListeners[partner]) return; // Уже слушаем
+            if (unreadListeners[partner]) return; 
 
             const roomUsers = [currentUser, partner].sort();
             const roomId = "chat_" + roomUsers[0] + "_" + roomUsers[1];
             
-            // Слушаем последние сообщения в этой комнате
             const chatRef = ref(db, 'chats/' + roomId);
             unreadListeners[partner] = onValue(chatRef, (snapshot) => {
                 let unreadCount = 0;
                 if (snapshot.exists()) {
                     const messages = snapshot.val();
                     
-                    // Получаем время последнего прочтения (если нет - 0)
                     get(ref(db, `lastRead/${currentUser}/${roomId}`)).then((readSnapshot) => {
                         const lastRead = readSnapshot.exists() ? readSnapshot.val() : 0;
 
                         for (const key in messages) {
                             const msg = messages[key];
-                            // Если сообщение от другого человека и оно новее, чем время прочтения
                             if (msg.sender !== currentUser && msg.timestamp > lastRead) {
                                 unreadCount++;
                             }
@@ -413,8 +398,6 @@
                                 badge.style.display = 'none';
                             }
                         }
-
-                        // Обновляем заголовок вкладки браузера
                         updateTabTitle();
                     });
                 } else {
@@ -425,7 +408,6 @@
             });
         }
 
-        // Обновление заголовка страницы (вкладки)
         function updateTabTitle() {
             let totalUnread = 0;
             document.querySelectorAll('.unread-badge').forEach(badge => {
@@ -480,7 +462,6 @@
             if (!found) allUsersList.innerHTML += "<div style='padding:10px;color:#888'>Никого не найдено</div>";
         };
 
-        // --- ЧАТ И ОТМЕТКА О ПРОЧТЕНИИ ---
         function openChat(partnerUsername, partnerNick, element) {
             document.querySelectorAll('.contact').forEach(c => c.classList.remove('active'));
             if (element) element.classList.add('active');
@@ -494,10 +475,8 @@
             const roomUsers = [currentUser, partnerUsername].sort();
             currentRoomId = "chat_" + roomUsers[0] + "_" + roomUsers[1];
             
-            // Отмечаем чат как прочитанный (записываем текущее время)
             set(ref(db, `lastRead/${currentUser}/${currentRoomId}`), Date.now());
 
-            // Скрываем кружок вручную, чтобы не ждать базы
             const badge = document.getElementById('badge_' + partnerUsername);
             if (badge) badge.style.display = 'none';
             updateTabTitle();
@@ -512,7 +491,22 @@
                 msgDiv.className = 'message ' + (msg.sender === currentUser ? 'my-msg' : 'other-msg');
                 msgDiv.dataset.id = msgId;
                 msgDiv.dataset.text = msg.text || "";
-                msgDiv.innerHTML = `<b style="font-size:12px;color:#666;display:block;">${msg.senderNick}</b> <span class="msg-content">${msg.text}</span>`;
+                
+                // Проверяем, есть ли ссылка на картинку
+                let messageHtml = `<b style="font-size:12px;color:#666;display:block;">${msg.senderNick}</b> <span class="msg-content">${msg.text}</span>`;
+                
+                // Если в тексте есть ссылка на картинку, показываем её
+                if (msg.text && (msg.text.match(/\.(jpeg|jpg|gif|png|webp)$/i) || msg.text.includes("i.ibb.co"))) {
+                    const urlMatch = msg.text.match(/https?:\/\/[^\s]+/);
+                    if (urlMatch) {
+                        const url = urlMatch[0];
+                        messageHtml = `<b style="font-size:12px;color:#666;display:block;">${msg.senderNick}</b> 
+                                       <span class="msg-content">${msg.text.replace(url, '')}</span>
+                                       <img src="${url}" class="msg-image">`;
+                    }
+                }
+                
+                msgDiv.innerHTML = messageHtml;
 
                 if (msg.sender === currentUser) {
                     msgDiv.addEventListener('contextmenu', (e) => {
@@ -520,7 +514,6 @@
                         showContextMenu(e, msgId, msg.text, msgDiv);
                     });
                 } else {
-                    // Если сообщение от собеседника и мы в этом чате, отмечаем как прочитанное
                     if (currentChatPartner === partnerUsername) {
                         set(ref(db, `lastRead/${currentUser}/${currentRoomId}`), Date.now());
                     }
@@ -556,8 +549,53 @@
                 timestamp: Date.now()
             }).then(() => {
                 document.getElementById('message-input').value = "";
-                // Когда мы пишем, мы точно прочитали
                 set(ref(db, `lastRead/${currentUser}/${currentRoomId}`), Date.now());
+            });
+        };
+
+        // --- ОТПРАВКА ФАЙЛОВ (IMGBB) ---
+        window.uploadFile = function() {
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+            if (!file || currentRoomId === "") return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert("Файл слишком большой! Максимум 5 МБ.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("image", file);
+
+            chatTitle.innerText = "Загрузка файла...";
+
+            // ВСТАВЬТЕ СЮДА ВАШ КЛЮЧ ИЗ IMGBB ВМЕСТО ВАШ_API_КЛЮЧ_ИЗ_IMGBB
+            fetch("https://api.imgbb.com/1/upload?key=97d22a881b5b093391e15aea3c79dfde", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    const imageUrl = result.data.url;
+                    
+                    push(ref(db, 'chats/' + currentRoomId), {
+                        sender: currentUser,
+                        senderNick: currentNick,
+                        text: imageUrl, // Отправляем чистую ссылку (код сам её распознает и покажет как картинку)
+                        timestamp: Date.now()
+                    });
+                    
+                    chatTitle.innerText = "Чат с " + currentChatPartner;
+                    fileInput.value = ""; 
+                } else {
+                    alert("Ошибка ImgBB: " + (result.error ? result.error.message : "Неизвестная ошибка"));
+                    chatTitle.innerText = "Чат с " + currentChatPartner;
+                }
+            })
+            .catch(error => {
+                alert("Ошибка сети: " + error.message);
+                chatTitle.innerText = "Чат с " + currentChatPartner;
             });
         };
 
@@ -571,7 +609,6 @@
             }
         };
 
-        // Контекстное меню
         function showContextMenu(e, msgId, msgText, msgDiv) {
             selectedMsgId = msgId; selectedMsgText = msgText; selectedMsgDiv = msgDiv;
             contextMenu.style.display = 'block';
@@ -581,11 +618,11 @@
         document.addEventListener('click', (e) => {
             if (!contextMenu.contains(e.target)) contextMenu.style.display = 'none';
         });
-                window.editMessage = function() {
+        
+        window.editMessage = function() {
             contextMenu.style.display = 'none';
             if (!selectedMsgId) return;
             
-            // Берем актуальный текст прямо из элемента на экране, а не из старой переменной
             const currentContentSpan = selectedMsgDiv.querySelector('.msg-content');
             const actualText = currentContentSpan ? currentContentSpan.innerText : selectedMsgText;
 
@@ -594,14 +631,13 @@
             if (newText !== null && newText.trim() !== "" && newText !== actualText) {
                 update(ref(db, 'chats/' + currentRoomId + '/' + selectedMsgId), { text: newText.trim() });
                 
-                // Обновляем на экране
                 if (currentContentSpan) currentContentSpan.innerText = newText.trim();
                 
-                // Обновляем скрытые переменные для следующего редактирования
                 selectedMsgText = newText.trim(); 
                 selectedMsgDiv.dataset.text = newText.trim();
             }
         };
+        
         window.deleteMessage = function() {
             contextMenu.style.display = 'none';
             if (!selectedMsgId) return;
